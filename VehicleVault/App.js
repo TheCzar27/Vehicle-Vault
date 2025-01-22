@@ -1,58 +1,25 @@
 import React from "react";
-import { StyleSheet, View, Image, TouchableOpacity, Text } from "react-native";
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import HomeScreen from "./Welcome";
+import LogIn from "./LogIn";
+
+const Stack = createStackNavigator();
 
 export default function App() {
   return (
-    <View style={styles.container}>
-      {/* Logo */}
-      <Image
-        source={require("./assets/logo.png")} 
-        style={styles.logo}
-      />
+    <NavigationContainer>
+      <Stack.Navigator>
+        {/* Home Screen */}
+        <Stack.Screen
+          name="Home"
+          component={HomeScreen}
+          options={{ headerShown: false }}
+        />
 
-      {/* Buttons */}
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Log In</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Register</Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+        {/* Log In Screen */}
+        <Stack.Screen name="LogIn" component={LogIn} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#D9E0EC", // background color from figma
-    alignItems: "center",
-    justifyContent: "center", 
-    padding: 20,
-  },
-  logo: {
-    width: 500, //  width for the logo
-    height: 500, //  height for the logo
-    resizeMode: "contain", 
-    marginBottom: 60, 
-  },
-  buttonContainer: {
-    width: "80%",
-  },
-  button: {
-    backgroundColor: "#000", // Black button color
-    paddingVertical: 14,
-    borderRadius: 8,
-    marginVertical: 10,
-    alignItems: "center",
-    borderWidth: 1,
-    borderColor: "#000", 
-  },
-  buttonText: {
-    color: "#fff", // white text for button
-    fontSize: 16,
-    fontWeight: "bold",
-  },
-});
