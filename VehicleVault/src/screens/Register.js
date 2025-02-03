@@ -15,11 +15,12 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons"; // For show/hide password icon
 
-export default function LoginScreen() {
+export default function RegisterScreen() {
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const navigation = useNavigation(); 
+  const navigation = useNavigation();
 
   return (
     <KeyboardAvoidingView
@@ -36,7 +37,16 @@ export default function LoginScreen() {
             />
 
             {/* Title */}
-            <Text style={styles.title}>Login</Text>
+            <Text style={styles.title}>Register</Text>
+
+            {/* Username Input */}
+            <TextInput
+              style={styles.input}
+              placeholder="Username"
+              placeholderTextColor="#A9A9A9"
+              value={username}
+              onChangeText={(text) => setUsername(text)}
+            />
 
             {/* Email Input */}
             <TextInput
@@ -70,16 +80,16 @@ export default function LoginScreen() {
               </TouchableOpacity>
             </View>
 
-            {/* Login Button */}
+            {/* Register Button */}
             <TouchableOpacity style={styles.button}>
-              <Text style={styles.buttonText}>Log In</Text>
+              <Text style={styles.buttonText}>Register</Text>
             </TouchableOpacity>
 
-            {/* Register Link */}
-            <TouchableOpacity onPress={() => navigation.navigate("Register")}>
+            {/* Login Link */}
+            <TouchableOpacity onPress={() => navigation.navigate("LogIn")}>
               <Text style={styles.registerText}>
-                Don’t have an account?{" "}
-                <Text style={styles.linkText}>Register</Text>
+                Already have an account?{" "}
+                <Text style={styles.linkText}>Login</Text>
               </Text>
             </TouchableOpacity>
           </View>
