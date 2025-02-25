@@ -6,94 +6,56 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-  TouchableWithoutFeedback,
-  Keyboard,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { Ionicons } from "@expo/vector-icons"; // For show/hide password icon
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const navigation = useNavigation(); 
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={{ flex: 1 }}
-    >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <View style={styles.container}>
-            {/* Logo */}
-            <Image
-              source={require("../../assets/logo.png")}
-              style={styles.logo}
-            />
+    <View style={styles.container}>
+      {/* Logo */}
+      <Image source={require("../../assets/logo.png")} style={styles.logo} />
 
-            {/* Title */}
-            <Text style={styles.title}>Login</Text>
+      {/* Title */}
+      <Text style={styles.title}>Login</Text>
 
-            {/* Email Input */}
-            <TextInput
-              style={styles.input}
-              placeholder="Email"
-              placeholderTextColor="#A9A9A9"
-              keyboardType="email-address"
-              value={email}
-              onChangeText={(text) => setEmail(text)}
-            />
+      {/* Email Input */}
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        placeholderTextColor="#A9A9A9"
+        keyboardType="email-address"
+        value={email}
+        onChangeText={(text) => setEmail(text)}
+      />
 
-            {/* Password Input with Show/Hide Feature */}
-            <View style={styles.passwordContainer}>
-              <TextInput
-                style={styles.passwordInput}
-                placeholder="Password"
-                placeholderTextColor="#A9A9A9"
-                secureTextEntry={!showPassword}
-                value={password}
-                onChangeText={(text) => setPassword(text)}
-              />
-              <TouchableOpacity
-                onPress={() => setShowPassword(!showPassword)}
-                style={styles.iconContainer}
-              >
-                <Ionicons
-                  name={showPassword ? "eye-off-outline" : "eye-outline"}
-                  size={24}
-                  color="#A9A9A9"
-                />
-              </TouchableOpacity>
-            </View>
+      {/* Password Input */}
+      <TextInput
+        style={styles.input}
+        placeholder="Password"
+        placeholderTextColor="#A9A9A9"
+        secureTextEntry={true}
+        value={password}
+        onChangeText={(text) => setPassword(text)}
+      />
 
-            {/* Login Button */}
-            <TouchableOpacity style={styles.button}>
-              <Text style={styles.buttonText}>Log In</Text>
-            </TouchableOpacity>
+      {/* Login Button */}
+      <TouchableOpacity style={styles.button}>
+        <Text style={styles.buttonText}>Log In</Text>
+      </TouchableOpacity>
 
-            {/* Register Link */}
-            <TouchableOpacity onPress={() => navigation.navigate("Register")}>
-              <Text style={styles.registerText}>
-                Don’t have an account?{" "}
-                <Text style={styles.linkText}>Register</Text>
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-      </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
+      {/* Register Link */}
+      <TouchableOpacity>
+        <Text style={styles.registerText}>
+          Don’t have an account? <Text style={styles.linkText}>Register</Text>
+        </Text>
+      </TouchableOpacity>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollContainer: {
-    flexGrow: 1,
-    justifyContent: "center",
-  },
   container: {
     flex: 1,
     backgroundColor: "#D9E0EC",
@@ -102,16 +64,16 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   logo: {
-    width: 200,
-    height: 200,
+    width: 200, // width of the logo
+    height: 200, // height 
     resizeMode: "contain",
-    marginBottom: 10,
+    marginBottom: 10, // space between the logo and the title
   },
   title: {
     fontSize: 40,
     fontWeight: "bold",
     color: "#000",
-    marginBottom: 50,
+    marginBottom: 100, // space between the title and text box for users
   },
   input: {
     width: "80%",
@@ -119,29 +81,10 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 16,
     borderRadius: 8,
-    marginBottom: 15,
+    marginBottom: 15, 
     fontSize: 16,
     borderWidth: 1,
     borderColor: "#A9A9A9",
-  },
-  passwordContainer: {
-    width: "80%",
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#fff",
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#A9A9A9",
-    marginBottom: 15,
-  },
-  passwordInput: {
-    flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    fontSize: 16,
-  },
-  iconContainer: {
-    padding: 10,
   },
   button: {
     backgroundColor: "#000",
