@@ -21,18 +21,11 @@ export default function App() {
       <StatusBar backgroundColor="#D9D9D9" />
       <NavigationContainer>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
-          {/* Welcome Screen (Starting Screen) */}
-          {/* <Stack.Screen name="Welcome" component={WelcomeScreen} /> */}
-
-          {/* Authentication Screens */}
-          {/* <Stack.Screen name="LogIn" component={LogInScreen} /> */}
-          {/* <Stack.Screen name="Register" component={RegisterScreen} /> */}
-
-          {/* Maintenance Screen */}
+          <Stack.Screen name="Welcome" component={WelcomeScreen} />
+          <Stack.Screen name="LogIn" component={LogInScreen} />
+          <Stack.Screen name="Register" component={RegisterScreen} />
           <Stack.Screen name="Maintenance" component={MaintenanceScreen} />
-
-          {/* Garage Screen */}
-          <Stack.Screen name= "Garage" component={GarageScreen}/>
+          <Stack.Screen name="Garage" component={GarageScreen} />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>

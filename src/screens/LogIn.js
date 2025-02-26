@@ -11,15 +11,45 @@ import {
   Platform,
   TouchableWithoutFeedback,
   Keyboard,
+  Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { Ionicons } from "@expo/vector-icons"; // For show/hide password icon
+import { Ionicons } from "@expo/vector-icons";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth, db } from "../config/firebaseConfig";
+import { doc, getDoc } from "firebase/firestore";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const navigation = useNavigation();
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert("Error", "Please enter email and password.");
+      return;
+    }
+
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        Alert.alert("Login Successful", `Welcome back, ${userData.username}!`);
+      } else {
+        Alert.alert("Error", "User data not found.");
+      }
+    } catch (error) {
+      Alert.alert("Login Error", error.message);
+    }
+  };
 
   return (
     <KeyboardAvoidingView
@@ -29,26 +59,21 @@ export default function LoginScreen() {
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView contentContainerStyle={styles.scrollContainer}>
           <View style={styles.container}>
-            {/* Logo */}
             <Image
               source={require("../../assets/logo.png")}
               style={styles.logo}
             />
-
-            {/* Title */}
             <Text style={styles.title}>Login</Text>
 
-            {/* Email Input */}
             <TextInput
               style={styles.input}
               placeholder="Email"
               placeholderTextColor="#A9A9A9"
               keyboardType="email-address"
               value={email}
-              onChangeText={(text) => setEmail(text)}
+              onChangeText={setEmail}
             />
 
-            {/* Password Input with Show/Hide Feature */}
             <View style={styles.passwordContainer}>
               <TextInput
                 style={styles.passwordInput}
@@ -56,7 +81,7 @@ export default function LoginScreen() {
                 placeholderTextColor="#A9A9A9"
                 secureTextEntry={!showPassword}
                 value={password}
-                onChangeText={(text) => setPassword(text)}
+                onChangeText={setPassword}
               />
               <TouchableOpacity
                 onPress={() => setShowPassword(!showPassword)}
@@ -70,12 +95,10 @@ export default function LoginScreen() {
               </TouchableOpacity>
             </View>
 
-            {/* Login Button */}
-            <TouchableOpacity style={styles.button}>
+            <TouchableOpacity style={styles.button} onPress={handleLogin}>
               <Text style={styles.buttonText}>Log In</Text>
             </TouchableOpacity>
 
-            {/* Register Link */}
             <TouchableOpacity onPress={() => navigation.navigate("Register")}>
               <Text style={styles.registerText}>
                 Don’t have an account?{" "}

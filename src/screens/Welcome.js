@@ -19,7 +19,13 @@ export default function HomeScreen({ navigation }) {
           <Text style={styles.buttonText}>Log In</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.button}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => {
+            console.log("Navigating to Register");
+            navigation.navigate("Register");
+          }}
+        >
           <Text style={styles.buttonText}>Register</Text>
         </TouchableOpacity>
       </View>
@@ -36,23 +42,24 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   logo: {
-    width: 450, // width for the logo
-    height: 500, // height for the logo
+    width: 300, // Adjusted width for better scaling
+    height: 300, // Adjusted height for better scaling
     resizeMode: "contain",
     marginBottom: -30,
   },
   title: {
-    fontSize: 50,
+    fontSize: 40,
     fontWeight: "bold",
     letterSpacing: 1,
     textAlign: "center",
     color: "#000", // Black color for the title
-    marginBottom: 150, // Space between the title and the buttons
+    marginBottom: 100, // Space between the title and the buttons
   },
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "center", // Center buttons horizontally
     width: "100%",
+    paddingHorizontal: 20,
   },
   button: {
     flex: 1,
