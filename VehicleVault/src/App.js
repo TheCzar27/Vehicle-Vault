@@ -5,6 +5,7 @@ import { createStackNavigator } from "@react-navigation/stack";
 import HomeScreen from "./screens/Welcome";
 import LogIn from "./screens/LogIn";
 import MaintenanceScreen from "./screens/Maintenance";
+import SettingsScreen from "./screens/Settings";
 import { StatusBar } from "expo-status-bar";
 import * as NavigationBar from "expo-navigation-bar";
 
