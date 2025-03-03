@@ -1,50 +1,90 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
-  StyleSheet,
-  Modal,
-  Text,
-  Image,
-  TouchableOpacity,
   ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  Text,
+  Modal,
+  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { collection, addDoc, query, where, getDocs, doc, deleteDoc } from "firebase/firestore";
+import { auth, db } from "../config/firebaseConfig"; // Import Firestore and Auth
 import BottomBar from "../components/BottomBar";
 import TopBar from "../components/TopBar";
 import VehicleCard from "../components/VehicleCard";
-import FordEscape from "../../assets/Ford_Escape.png";
-import ChevroletEquinox from "../../assets/Chevrolet_Equinox.png";
+import AddVehicle from "../components/AddVehicle";
 
-export default function GarageScreen() {
-  const [selectedVehicle, setSelectedVehicle] = useState(null);
+export default function Garage() {
+  const [vehicles, setVehicles] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [selectedVehicle, setSelectedVehicle] = useState(null); // Stores the vehicle selected for the modal
+  const [addVehicleModalVisible, setAddVehicleModalVisible] = useState(false);
+  const user = auth.currentUser;
 
-  const vehicles = [
-    {
-      id: 1,
-      name: "2024 Ford Escape",
-      vin: "123456789abcdefg",
-      fuelEfficiency: "22.9 MPG",
-      tradeInValue: "$1,000,000",
-      vehicleLife: "26,272.2 mi",
-      registerDate: "12/31/2024",
-      maintenance: "Brake Maintenance Needed",
-      image: require("../../assets/Ford_Escape.png"),
-    },
-    {
-      id: 2,
-      name: "2017 Chevrolet Equinox",
-      vin: "abcdefg1234567890",
-      fuelEfficiency: "23.1 MPG",
-      tradeInValue: "$1,000,001",
-      vehicleLife: "25,292.3 mi",
-      registerDate: "01/01/2025",
-      maintenance: "No Maintenance Needed",
-      image: require("../../assets/Chevrolet_Equinox.png"),
-    },
-  ];
+  useEffect(() => {
+    if (user) {
+      fetchUserVehicles(user.uid);
+    }
+  }, [user]);
 
-  const handleVehiclePress = (vehicle) => {
+  // Function to fetch user's vehicles from Firestore
+  const fetchUserVehicles = async (userId) => {
+    try {
+      const q = query(collection(db, "vehicles"), where("userId", "==", userId));
+      const querySnapshot = await getDocs(q);
+      const fetchedVehicles = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setVehicles(fetchedVehicles);
+    } catch (error) {
+      console.error("Error fetching vehicles: ", error);
+    }
+  };
+
+  // Function to add vehicle to Firestore
+  const handleAddVehicle = async (newVehicle) => {
+    if (!user) {
+      console.log("No user logged in");
+      return;
+    }
+
+    try {
+      const vehicleData = {
+        userId: user.uid,
+        vehicleName: newVehicle.vehicleName,
+        vin: newVehicle.vin,
+        fuelEfficiency: newVehicle.fuelEfficiency,
+        vehicleLife: newVehicle.vehicleLife,
+        tradeInValue: newVehicle.tradeInValue,
+        registerDate: new Date().toLocaleDateString(),
+        maintenance: "No Maintenance Needed",
+        image: newVehicle.image || "default_vehicle.png",
+      };
+
+      const docRef = await addDoc(collection(db, "vehicles"), vehicleData);
+      console.log("Vehicle added with ID: ", docRef.id);
+      setVehicles([...vehicles, { id: docRef.id, ...vehicleData }]);
+    } catch (error) {
+      console.error("Error adding vehicle: ", error);
+    }
+  };
+
+  // Function to delete vehicle from Firestore
+  const handleDeleteVehicle = async (vehicleId) => {
+    try {
+      await deleteDoc(doc(db, "vehicles", vehicleId));
+      setVehicles(vehicles.filter((vehicle) => vehicle.id !== vehicleId));
+    } catch (error) {
+      console.error("Error deleting vehicle:", error);
+      alert(`Error deleting vehicle: ${error.message}`);
+    }
+  };
+
+  // Function to show the modal with vehicle details
+  const handleShowVehicleDetails = (vehicle) => {
     setSelectedVehicle(vehicle);
     setModalVisible(true);
   };
@@ -55,43 +95,53 @@ export default function GarageScreen() {
       <TopBar
         headingTitle="Garage"
         pressableIcon="add-outline"
-        iconFunction={() => console.log("Add vehicle button pressed")}
+        iconFunction={() => setAddVehicleModalVisible(true)}
       />
 
       {/* Vehicle List */}
-      <ScrollView contentContainerStyle={styles.vehicleList}>
-        {vehicles.map((vehicle) => (
-          <VehicleCard
-            key={vehicle.id}
-            vehicle={vehicle}
-            onPress={handleVehiclePress}
-          />
-        ))}
-      </ScrollView>
+      {vehicles.length === 0 ? (
+        <View style={styles.emptyGarage}>
+          <Text style={styles.emptyText}>No vehicles added</Text>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => setAddVehicleModalVisible(true)}
+          >
+            <Text style={styles.addButtonText}>Add a Vehicle</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <ScrollView contentContainerStyle={styles.vehicleList}>
+          {vehicles.map((vehicle) => (
+            <VehicleCard
+              key={vehicle.id}
+              vehicle={vehicle}
+              onPress={() => handleShowVehicleDetails(vehicle)} // Open modal instead of navigating
+              onDelete={handleDeleteVehicle}
+            />
+          ))}
+        </ScrollView>
+      )}
 
-      {/* Modal for Vehicle Information */}
-      <Modal
-        visible={modalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setModalVisible(false)}
-      >
+      {/* Vehicle Details Modal */}
+      <Modal visible={modalVisible} animationType="slide" transparent={true}>
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
             {selectedVehicle && (
               <>
+                <Text style={styles.modalTitle}>
+                  {selectedVehicle.vehicleName}
+                </Text>
                 <Image
-                  source={selectedVehicle.image}
+                  source={{ uri: selectedVehicle.image }}
                   style={styles.modalImage}
                 />
-                <Text style={styles.modalTitle}>{selectedVehicle.name}</Text>
                 <Text>VIN: {selectedVehicle.vin}</Text>
-                <Text>Fuel Efficiency: {selectedVehicle.fuelEfficiency}</Text>
-                <Text>Trade-in Value: {selectedVehicle.tradeInValue}</Text>
-                <Text>Vehicle Life: {selectedVehicle.vehicleLife}</Text>
                 <Text>
-                  Vehicle Register Date: {selectedVehicle.registerDate}
+                  Fuel Efficiency: {selectedVehicle.fuelEfficiency} MPG
                 </Text>
+                <Text>Trade-in Value: ${selectedVehicle.tradeInValue}</Text>
+                <Text>Vehicle Life: {selectedVehicle.vehicleLife} miles</Text>
+                <Text>Register Date: {selectedVehicle.registerDate}</Text>
                 <Text>Maintenance Alerts: {selectedVehicle.maintenance}</Text>
                 <TouchableOpacity
                   style={styles.closeButton}
@@ -104,6 +154,13 @@ export default function GarageScreen() {
           </View>
         </View>
       </Modal>
+
+      {/* Add Vehicle Modal */}
+      <AddVehicle
+        visible={addVehicleModalVisible}
+        onClose={() => setAddVehicleModalVisible(false)}
+        onAdd={handleAddVehicle}
+      />
 
       {/* Bottom Bar */}
       <BottomBar />
@@ -120,6 +177,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 20,
   },
+  emptyGarage: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  emptyText: {
+    fontSize: 18,
+    marginBottom: 10,
+  },
+  addButton: {
+    backgroundColor: "#4682B4",
+    padding: 12,
+    borderRadius: 8,
+  },
+  addButtonText: {
+    color: "#FFFFFF",
+    fontWeight: "bold",
+  },
   modalContainer: {
     flex: 1,
     backgroundColor: "rgba(0, 0, 0, 0.5)",
@@ -133,15 +208,15 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: "center",
   },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
   modalImage: {
     width: 200,
     height: 120,
     resizeMode: "contain",
-    marginBottom: 10,
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "bold",
     marginBottom: 10,
   },
   closeButton: {

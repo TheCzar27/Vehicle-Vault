@@ -42,7 +42,14 @@ export default function LoginScreen() {
       const userDoc = await getDoc(doc(db, "users", user.uid));
       if (userDoc.exists()) {
         const userData = userDoc.data();
-        Alert.alert("Login Successful", `Welcome back, ${userData.username}!`);
+         Alert.alert("Login Successful",`Welcome back, ${userData.username}!`,
+           [
+             {
+               text: "OK",
+               onPress: () => navigation.replace("Garage"), 
+             },
+           ]
+         );
       } else {
         Alert.alert("Error", "User data not found.");
       }
