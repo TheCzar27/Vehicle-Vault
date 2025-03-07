@@ -9,7 +9,16 @@ import {
   Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { collection, addDoc, query, where, getDocs, doc, deleteDoc } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  query,
+  where,
+  getDocs,
+  doc,
+  deleteDoc,
+  getDoc,
+} from "firebase/firestore";
 import { auth, db } from "../config/firebaseConfig"; // Import Firestore and Auth
 import BottomBar from "../components/BottomBar";
 import TopBar from "../components/TopBar";
@@ -18,21 +27,26 @@ import AddVehicle from "../components/AddVehicle";
 
 export default function Garage() {
   const [vehicles, setVehicles] = useState([]);
+  const [username, setUsername] = useState(""); // Store the username
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState(null); // Stores the vehicle selected for the modal
   const [addVehicleModalVisible, setAddVehicleModalVisible] = useState(false);
   const user = auth.currentUser;
 
   useEffect(() => {
-    if (user) {
+    if (user?.uid) {
       fetchUserVehicles(user.uid);
+      fetchUsername(user.uid);
     }
-  }, [user]);
+  }, [user?.uid]); 
 
   // Function to fetch user's vehicles from Firestore
   const fetchUserVehicles = async (userId) => {
     try {
-      const q = query(collection(db, "vehicles"), where("userId", "==", userId));
+      const q = query(
+        collection(db, "vehicles"),
+        where("userId", "==", userId)
+      );
       const querySnapshot = await getDocs(q);
       const fetchedVehicles = querySnapshot.docs.map((doc) => ({
         id: doc.id,
@@ -40,7 +54,20 @@ export default function Garage() {
       }));
       setVehicles(fetchedVehicles);
     } catch (error) {
-      console.error("Error fetching vehicles: ", error);
+      console.error("Error fetching vehicles:", error);
+    }
+  };
+
+  // Function to fetch the username from Firestore
+  const fetchUsername = async (userId) => {
+    try {
+      const userDocRef = doc(db, "users", userId);
+      const userDoc = await getDoc(userDocRef);
+      if (userDoc.exists()) {
+        setUsername(userDoc.data().username || "User"); // Default if username is missing
+      }
+    } catch (error) {
+      console.error("Error fetching username:", error);
     }
   };
 
@@ -65,10 +92,13 @@ export default function Garage() {
       };
 
       const docRef = await addDoc(collection(db, "vehicles"), vehicleData);
-      console.log("Vehicle added with ID: ", docRef.id);
-      setVehicles([...vehicles, { id: docRef.id, ...vehicleData }]);
+      console.log("Vehicle added with ID:", docRef.id);
+      setVehicles((prevVehicles) => [
+        ...prevVehicles,
+        { id: docRef.id, ...vehicleData },
+      ]);
     } catch (error) {
-      console.error("Error adding vehicle: ", error);
+      console.error("Error adding vehicle:", error);
     }
   };
 
@@ -76,7 +106,9 @@ export default function Garage() {
   const handleDeleteVehicle = async (vehicleId) => {
     try {
       await deleteDoc(doc(db, "vehicles", vehicleId));
-      setVehicles(vehicles.filter((vehicle) => vehicle.id !== vehicleId));
+      setVehicles((prevVehicles) =>
+        prevVehicles.filter((vehicle) => vehicle.id !== vehicleId)
+      );
     } catch (error) {
       console.error("Error deleting vehicle:", error);
       alert(`Error deleting vehicle: ${error.message}`);
@@ -93,7 +125,7 @@ export default function Garage() {
     <SafeAreaView style={styles.container}>
       {/* Top Bar */}
       <TopBar
-        headingTitle="Garage"
+        headingTitle={username ? `${username}'s Garage` : "Garage"} // display username
         pressableIcon="add-outline"
         iconFunction={() => setAddVehicleModalVisible(true)}
       />

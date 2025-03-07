@@ -26,7 +26,7 @@ export default function BottomBar() {
         <FontAwesome name="map-o" size={24} color="black" />
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => console.log("Button 5 pressed")}>
+      <TouchableOpacity onPress={() => navigation.navigate("Settings")}>
         <Ionicons name="settings-outline" size={24} color="black" />
       </TouchableOpacity>
     </View>

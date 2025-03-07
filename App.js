@@ -6,15 +6,17 @@ import WelcomeScreen from "./src/screens/Welcome";
 import LogInScreen from "./src/screens/LogIn";
 import RegisterScreen from "./src/screens/Register";
 import MaintenanceScreen from "./src/screens/Maintenance";
-import GarageScreen  from "./src/screens/Garage";
+import GarageScreen from "./src/screens/Garage";
+import SettingsScreen from "./src/screens/Settings";
+import ChangePasswordScreen from "./src/screens/ChangePassword";
 import { StatusBar } from "expo-status-bar";
 
 const Stack = createStackNavigator();
 
 export default function App() {
-  // NOTE FOR TESTING, when testing your screen create an instance for it under
-  //  Stack.Navigator like what is below. Comment or uncomment as needed, what
-  //  is uncommented on top of the list will be the starting screen
+  // NOTE FOR TESTING: when testing your screen, create an instance for it under
+  // Stack.Navigator like what is below. Comment or uncomment as needed.
+  // The first uncommented screen will be the starting screen.
 
   return (
     <SafeAreaProvider>
@@ -26,6 +28,11 @@ export default function App() {
           <Stack.Screen name="Register" component={RegisterScreen} />
           <Stack.Screen name="Maintenance" component={MaintenanceScreen} />
           <Stack.Screen name="Garage" component={GarageScreen} />
+          <Stack.Screen name="Settings" component={SettingsScreen} />
+          <Stack.Screen
+            name="ChangePassword"
+            component={ChangePasswordScreen}
+          />
         </Stack.Navigator>
       </NavigationContainer>
     </SafeAreaProvider>
