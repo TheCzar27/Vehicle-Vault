@@ -7,12 +7,15 @@ import {
   Text,
   Pressable,
 } from "react-native";
+import { useNavigation } from "@react-navigation/native"; // Import navigation
 import TopBar from "../components/TopBar";
 import BottomBar from "../components/BottomBar";
 import { StatusBar } from "expo-status-bar";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 export default function SettingsScreen() {
+  const navigation = useNavigation(); 
+
   // displayed list of settings
   // was thinking of also adding dark mode toggle, unit/measurement system, and a contact support/give feedback setting
   // but just gonna stick with the basics for now
@@ -40,7 +43,7 @@ export default function SettingsScreen() {
     {
       label: "Change Password",
       icon: "lock-reset",
-      onPress: () => console.log("Change Password Pressed"),
+      onPress: () => navigation.navigate("ChangePassword"), 
     },
     {
       label: "Log Out",
@@ -60,7 +63,7 @@ export default function SettingsScreen() {
 
       <TopBar headingTitle="Settings" />
 
-      {/* scrollabe settings list */}
+      {/* scrollable settings list */}
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {settingsOptions.map((item, index) => (
           <Pressable
