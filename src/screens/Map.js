@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#fff",
-        padding: 16,
+        padding: 0,
     },
     searchBox: {
         height: 40,
@@ -54,9 +54,11 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         paddingHorizontal: 10,
         marginBottom: 10,
+        marginHorizontal: 16
     },
     filterContainer: {
         paddingVertical: 10,
+        margin: 16
     },
     mapPlaceholder: {
         flex: 1,
@@ -64,6 +66,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         backgroundColor: "#ddd",
         marginTop: 5,
+        margin: 16,
         borderRadius: 8,
         marginBottom: 10,
     },
