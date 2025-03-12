@@ -39,7 +39,6 @@ export default function Garage() {
       fetchUsername(user.uid);
     }
   }, [user?.uid]); 
-
   // Function to fetch user's vehicles from Firestore
   const fetchUserVehicles = async (userId) => {
     try {
