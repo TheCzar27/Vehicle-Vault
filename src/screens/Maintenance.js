@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
 	SafeAreaView,
 	ScrollView,
@@ -9,6 +9,7 @@ import {
 	Modal,
 	Pressable,
 } from "react-native";
+// import { FilterContext } from "../contexts/FilterContext";
 import TopBar from "../components/TopBar";
 import BottomBar from "../components/BottomBar";
 import Card from "../components/Card";
@@ -20,48 +21,21 @@ import { useSmartCarAuth } from "../utils/smartcarAuth";
 import { storeAuthTokens } from "../utils/storeAuthTokens";
 import { auth, db } from "../config/firebaseConfig";
 import { fetchVehicleData } from "../utils/fetchVehicleData";
+import FilterScreen from "./MaintenanceFilters";
+import { FilterContext } from "../utils/FilterContext";
 
-export default function MaintenanceScreen() {
+export default function MaintenanceScreen({ navigation }) {
 	const { request, promptAsync } = useSmartCarAuth();
 	const user = auth.currentUser;
-
-	// state to control modal visibility
-	const [modalVisible, setModalVisible] = useState(false);
-
-	// function that is being called when button is pressed
-	const openModal = () => {
-		setModalVisible(true);
-	};
-
-	// states to track which filters are toggled
-	const [showOil, setShowOil] = useState(true);
-	const [showFilter, setShowFilter] = useState(true);
-	const [showTires, setShowTires] = useState(true);
-	const [color, setColor] = useState("#D9D9D9");
-
-	const [tireDataState, setTireDataState] = useState(null);
-	const [oilDataState, setOilDataState] = useState(null);
-
-	useEffect(() => {
-		let timer;
-		if (modalVisible) {
-			// wait 500ms, then set color
-			timer = setTimeout(() => {
-				setColor("rgba(0,0,0,0.5)");
-			}, 0);
-		} else {
-			timer = setTimeout(() => {
-				setColor("#D9D9D9");
-			}, 0);
-		}
-		// cleanup if the effect re-runs or unmounts
-		return () => clearTimeout(timer);
-	}, [modalVisible]);
+	const { showOil, showFilter, showTires } = useContext(FilterContext);
 
 	return (
 		<SafeAreaView style={styles.container}>
-			<StatusBar animated backgroundColor={color} />
-			<TopBar headingTitle="Maintenance" pressableIcon={"filter"} iconFunction={openModal} />
+			<TopBar
+				headingTitle="Maintenance"
+				pressableIcon={"filter"}
+				iconFunction={() => navigation.navigate("MaintenanceFilters")}
+			/>
 
 			<ScrollView contentContainerStyle={styles.scrollContent}>
 				<View
@@ -85,7 +59,7 @@ export default function MaintenanceScreen() {
 						icon="tire"
 						iconSize={52}
 						title="Tires"
-						percentage={tireDataState ? tireDataState.frontLeft * 0.1450377 : "N/A"}
+						percentage={"N/A"}
 						date="Rotate on 2/5/25"
 					/>
 				)}
@@ -96,7 +70,7 @@ export default function MaintenanceScreen() {
 						icon="oil-can"
 						iconSize={42}
 						title="Oil life"
-						percentage={oilDataState ? oilDataState.lifeRemaining * 100 : "N/A"}
+						percentage={"N/A"}
 						date="Last changed: 2/8/25"
 					/>
 				)}
@@ -115,28 +89,6 @@ export default function MaintenanceScreen() {
 			</ScrollView>
 
 			<BottomBar />
-
-			<Modal
-				visible={modalVisible}
-				transparent
-				animationType="fade"
-				onRequestClose={() => setModalVisible(false)}
-			>
-				<Pressable
-					style={styles.modalBackground}
-					onPress={() => setModalVisible(false)}
-				></Pressable>
-
-				<View style={styles.modalContainer}>
-					<Text style={styles.modalTitle}>Filter Maintenance Items</Text>
-
-					<FilterCheckbox label="Show Tires" value={showTires} onValueChange={setShowTires} />
-					<FilterCheckbox label="Show Oil" value={showOil} onValueChange={setShowOil} />
-					<FilterCheckbox label="Show Filter" value={showFilter} onValueChange={setShowFilter} />
-
-					<Button title="Close" onPress={() => setModalVisible(false)} />
-				</View>
-			</Modal>
 		</SafeAreaView>
 	);
 }
@@ -149,32 +101,5 @@ const styles = StyleSheet.create({
 	scrollContent: {
 		padding: 16,
 		paddingTop: 40,
-	},
-	modalBackground: {
-		position: "absolute",
-		top: 0,
-		left: 0,
-		right: 0,
-		bottom: 0,
-		backgroundColor: "rgba(0,0,0,0.5)",
-	},
-	modalContainer: {
-		position: "absolute",
-		top: "30%",
-		left: "10%",
-		width: "80%",
-		padding: 20,
-		backgroundColor: "#fff",
-		borderRadius: 10,
-		shadowColor: "#000",
-		shadowOffset: { width: 0, height: 2 },
-		shadowOpacity: 0.2,
-		shadowRadius: 4,
-		elevation: 5,
-	},
-	modalTitle: {
-		fontSize: 18,
-		fontWeight: "bold",
-		marginBottom: 16,
 	},
 });
