@@ -18,6 +18,7 @@ import {
   EmailAuthProvider,
   updatePassword,
 } from "firebase/auth";
+import TopBar from "../components/TopBar";
 
 export default function ChangePasswordScreen() {
   const navigation = useNavigation();
@@ -65,16 +66,7 @@ export default function ChangePasswordScreen() {
     <SafeAreaView style={styles.container}>
       <StatusBar animated backgroundColor="#D9D9D9" />
 
-      {/* Top Bar with Back Arrow */}
-      <View style={styles.topBar}>
-        <Pressable
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-        >
-          <MaterialCommunityIcons name="arrow-left" size={28} color="black" />
-        </Pressable>
-        <Text style={styles.title}>Change Password</Text>
-      </View>
+      <TopBar headingTitle="Change Password" showBack={true} />
 
       <View style={styles.content}>
         {/* Current Password Field */}

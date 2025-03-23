@@ -13,6 +13,7 @@ import SettingsScreen from "./src/screens/Settings"
 import NotificationsScreen from "./src/screens/Notifications";
 import LocationSettingsScreen from "./src/screens/LocationSettings";
 import DisplaySettingsScreen from "./src/screens/DisplaySettings";
+import ChangePasswordScreen from "./src/screens/ChangePassword";
 import Map from "./src/screens/Map";
 import Finances from "./src/screens/Finances";
 import AddPayment from "./src/screens/AddPayment";
@@ -55,9 +56,9 @@ function SettingsScreens () {
 			<SettingsStack.Screen name="Notifications" component={NotificationsScreen} />
 			<SettingsStack.Screen name="LocationSettings" component={LocationSettingsScreen} />
 			<SettingsStack.Screen name="DisplaySettings" component={DisplaySettingsScreen} />
+			<SettingsStack.Screen name="ChangePassword" component={ChangePasswordScreen} />
 			{ /*<SettingsStack.Screen name="TermsOfServices" component={TermsOfServicesScreen} />
 			<SettingsStack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
-			<SettingsStack.Screen name="ChangePassword" component={ChangePasswordScreen} />
 			<SettingsStack.Screen name="LogOut" component={LogOutScreen} />
 			<SettingsStack.Screen name="DeleteAccount" component={DeleteAccountScreen} /> */}
 			
