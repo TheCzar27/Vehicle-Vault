@@ -9,6 +9,10 @@ import LogInScreen from "./src/screens/LogIn";
 import RegisterScreen from "./src/screens/Register";
 import MaintenanceScreen from "./src/screens/Maintenance";
 import GarageScreen from "./src/screens/Garage";
+import SettingsScreen from "./src/screens/Settings"
+import NotificationsScreen from "./src/screens/Notifications";
+import LocationSettingsScreen from "./src/screens/LocationSettings";
+import DisplaySettingsScreen from "./src/screens/DisplaySettings";
 import Map from "./src/screens/Map";
 import Finances from "./src/screens/Finances";
 import AddPayment from "./src/screens/AddPayment";
@@ -21,6 +25,7 @@ const RootStack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 const FinancesStack = createStackNavigator();
 const MaintenanceStack = createStackNavigator();
+const SettingsStack = createStackNavigator();
 
 // stack nav for finanances and its subscreens
 function FinancesScreens() {
@@ -42,6 +47,25 @@ function MaintenanceScreens() {
 	);
 }
 
+function SettingsScreens () {
+	return (
+		<SettingsStack.Navigator screenOptions={{ headerShown: false }}>
+			<SettingsStack.Screen name="SettingsMain" component={SettingsScreen} />
+
+			<SettingsStack.Screen name="Notifications" component={NotificationsScreen} />
+			<SettingsStack.Screen name="LocationSettings" component={LocationSettingsScreen} />
+			<SettingsStack.Screen name="DisplaySettings" component={DisplaySettingsScreen} />
+			{ /*<SettingsStack.Screen name="TermsOfServices" component={TermsOfServicesScreen} />
+			<SettingsStack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
+			<SettingsStack.Screen name="ChangePassword" component={ChangePasswordScreen} />
+			<SettingsStack.Screen name="LogOut" component={LogOutScreen} />
+			<SettingsStack.Screen name="DeleteAccount" component={DeleteAccountScreen} /> */}
+			
+
+		</SettingsStack.Navigator>
+	)
+}
+
 // tab nav for main screens
 function MainScreensNav() {
 	return (
@@ -50,7 +74,7 @@ function MainScreensNav() {
 			<Tab.Screen name="Maintenance" component={MaintenanceScreens} />
 			<Tab.Screen name="Finances" component={FinancesScreens} />
 			<Tab.Screen name="Map" component={Map} />
-			<Tab.Screen name="Settings" component={Settings} />
+			<Tab.Screen name="Settings" component={SettingsScreens} />
 		</Tab.Navigator>
 	);
 }

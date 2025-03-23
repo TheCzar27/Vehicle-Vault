@@ -23,22 +23,27 @@ export default function SettingsScreen() {
     {
       label: "Notifications",
       icon: "bell",
-      onPress: () => console.log("Notifications Pressed"),
+      onPress: () => navigation.navigate("Notifications"),
     },
     {
       label: "Location Settings",
       icon: "map-marker",
-      onPress: () => console.log("Location Settings Pressed"),
+      onPress: () => navigation.navigate("LocationSettings"),
+    },
+    {
+      label: "Display Settings",
+      icon: "tune",
+      onPress: () => navigation.navigate("DisplaySettings"),
     },
     {
       label: "Terms of Services",
       icon: "file-document-outline",
-      onPress: () => console.log("Terms of Services Pressed"),
+      onPress: () => navigation.navigate("TermsOfServices"),
     },
     {
       label: "Privacy Policy",
       icon: "shield-lock-outline",
-      onPress: () => console.log("Privacy Policy Pressed"),
+      onPress: () => navigation.navigate("PrivacyPolicy"),
     },
     {
       label: "Change Password",
@@ -48,12 +53,12 @@ export default function SettingsScreen() {
     {
       label: "Log Out",
       icon: "logout",
-      onPress: () => console.log("Log Out Pressed"),
+      onPress: () => navigation.navigate("LogOut"),
     },
     {
       label: "Delete Account",
       icon: "delete-forever",
-      onPress: () => console.log("Delete Account Pressed"),
+      onPress: () => navigation.navigate("DeleteAccount"),
     },
   ];
 
