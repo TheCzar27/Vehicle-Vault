@@ -6,19 +6,66 @@ import {
   View,
   Text,
   Pressable,
+  Alert,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native"; // Import navigation
+import { useNavigation } from "@react-navigation/native";
 import TopBar from "../components/TopBar";
 import BottomBar from "../components/BottomBar";
 import { StatusBar } from "expo-status-bar";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { signOut, deleteUser } from "firebase/auth";
+import { auth, db } from "../config/firebaseConfig";
+import { doc, deleteDoc } from "firebase/firestore";
 
 export default function SettingsScreen() {
-  const navigation = useNavigation(); 
+  const navigation = useNavigation();
 
-  // displayed list of settings
-  // was thinking of also adding dark mode toggle, unit/measurement system, and a contact support/give feedback setting
-  // but just gonna stick with the basics for now
+  const handleLogout = () => {
+    Alert.alert("Log Out", "Are you sure you want to log out?", [
+      { text: "Cancel", style: "cancel" },
+      {
+        text: "Log Out",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await signOut(auth);
+            navigation.replace("LogIn");
+          } catch (error) {
+            Alert.alert("Logout Error", error.message);
+          }
+        },
+      },
+    ]);
+  };
+
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      "Delete Account",
+      "This will permanently delete your account and data. Continue?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const user = auth.currentUser;
+              if (user) {
+                await deleteDoc(doc(db, "users", user.uid));
+                await deleteUser(user);
+                navigation.replace("Register");
+              } else {
+                Alert.alert("Error", "No user is currently signed in.");
+              }
+            } catch (error) {
+              Alert.alert("Delete Account Error", error.message);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const settingsOptions = [
     {
       label: "Notifications",
@@ -48,17 +95,17 @@ export default function SettingsScreen() {
     {
       label: "Change Password",
       icon: "lock-reset",
-      onPress: () => navigation.navigate("ChangePassword"), 
+      onPress: () => navigation.navigate("ChangePassword"),
     },
     {
       label: "Log Out",
       icon: "logout",
-      onPress: () => navigation.navigate("LogOut"),
+      onPress: handleLogout,
     },
     {
       label: "Delete Account",
       icon: "delete-forever",
-      onPress: () => navigation.navigate("DeleteAccount"),
+      onPress: handleDeleteAccount,
     },
   ];
 
@@ -68,7 +115,6 @@ export default function SettingsScreen() {
 
       <TopBar headingTitle="Settings" />
 
-      {/* scrollable settings list */}
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {settingsOptions.map((item, index) => (
           <Pressable
@@ -76,7 +122,6 @@ export default function SettingsScreen() {
             style={styles.settingItem}
             onPress={item.onPress}
           >
-            {/* setting icons */}
             <View style={styles.iconContainer}>
               <MaterialCommunityIcons
                 name={item.icon}
@@ -84,8 +129,6 @@ export default function SettingsScreen() {
                 color={"#000"}
               />
             </View>
-
-            {/* label for each setting */}
             <Text style={styles.settingLabel}>{item.label}</Text>
           </Pressable>
         ))}
@@ -105,7 +148,6 @@ const styles = StyleSheet.create({
     padding: 16,
     paddingTop: 40,
   },
-  // each row in settings screen
   settingItem: {
     flexDirection: "row",
     alignItems: "center",

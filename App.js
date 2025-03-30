@@ -61,9 +61,7 @@ function SettingsScreens () {
 			<SettingsStack.Screen name="ChangePassword" component={ChangePasswordScreen} />
 			<SettingsStack.Screen name="PrivacyPolicy" component={PrivacyPolicyScreen} />
 			<SettingsStack.Screen name="TermsOfServices" component={TermsOfServicesScreen} />
-			{ /* />
-			<SettingsStack.Screen name="LogOut" component={LogOutScreen} />
-			<SettingsStack.Screen name="DeleteAccount" component={DeleteAccountScreen} /> */}
+			
 			
 
 		</SettingsStack.Navigator>
@@ -84,24 +82,24 @@ function MainScreensNav() {
 }
 
 export default function App() {
-	// NOTE FOR TESTING, when testing your screen create an instance for it under
-	//  Stack.Navigator like what is below. Comment or uncomment as needed, what
-	//  is uncommented on top of the list will be the starting screen
+  // NOTE FOR TESTING, when testing your screen create an instance for it under
+  //  Stack.Navigator like what is below. Comment or uncomment as needed, what
+  //  is uncommented on top of the list will be the starting screen
 
-	return (
-		<FilterProvider>
-			<SafeAreaProvider>
-				<StatusBar backgroundColor="#D9D9D9" />
-				<NavigationContainer>
-					<RootStack.Navigator screenOptions={{ headerShown: false }}>
-						{/* <RootStack.Screen name="Welcome" component={WelcomeScreen} />
-						<RootStack.Screen name="LogIn" component={LogInScreen} />
-						<RootStack.Screen name="Register" component={RegisterScreen} /> */}
-						{/* below are main screens */}
-						<RootStack.Screen name="Main" component={MainScreensNav} />
-					</RootStack.Navigator>
-				</NavigationContainer>
-			</SafeAreaProvider>
-		</FilterProvider>
-	);
+  return (
+    <FilterProvider>
+      <SafeAreaProvider>
+        <StatusBar backgroundColor="#D9D9D9" />
+        <NavigationContainer>
+          <RootStack.Navigator screenOptions={{ headerShown: false }}>
+            <RootStack.Screen name="Welcome" component={WelcomeScreen} />
+            <RootStack.Screen name="LogIn" component={LogInScreen} />
+            <RootStack.Screen name="Register" component={RegisterScreen} />
+            {/* Main app screens */}
+            <RootStack.Screen name="Main" component={MainScreensNav} />
+          </RootStack.Navigator>
+        </NavigationContainer>
+      </SafeAreaProvider>
+    </FilterProvider>
+  );
 }

@@ -15,7 +15,10 @@ import {
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Ionicons } from "@expo/vector-icons";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+} from "firebase/auth";
 import { auth, db } from "../config/firebaseConfig";
 import { doc, setDoc } from "firebase/firestore";
 
@@ -47,7 +50,14 @@ export default function RegisterScreen() {
         createdAt: new Date(),
       });
 
-      Alert.alert("Registration Successful", "Your account has been created.");
+      // Send email verification after successful registration
+      await sendEmailVerification(user);
+
+      Alert.alert(
+        "Registration Successful",
+        "Your account has been created. Please check your email to verify your account before logging in."
+      );
+
       navigation.navigate("LogIn");
     } catch (error) {
       Alert.alert("Registration Error", error.message);
@@ -70,7 +80,7 @@ export default function RegisterScreen() {
 
             <TextInput
               style={styles.input}
-              placeholder="Username"
+              placeholder="Name"
               placeholderTextColor="#A9A9A9"
               value={username}
               onChangeText={setUsername}

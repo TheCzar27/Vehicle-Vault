@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
     width: 300, // Adjusted width for better scaling
     height: 300, // Adjusted height for better scaling
     resizeMode: "contain",
-    marginBottom: -30,
+    marginBottom: -10,
   },
   title: {
     fontSize: 40,

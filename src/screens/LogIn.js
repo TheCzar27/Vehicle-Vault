@@ -39,17 +39,24 @@ export default function LoginScreen() {
       );
       const user = userCredential.user;
 
+      // Check if email is verified before proceeding
+      if (!user.emailVerified) {
+        Alert.alert(
+          "Email Not Verified",
+          "Please verify your email before logging in."
+        );
+        return;
+      }
+
       const userDoc = await getDoc(doc(db, "users", user.uid));
       if (userDoc.exists()) {
         const userData = userDoc.data();
-         Alert.alert("Login Successful",`Welcome back, ${userData.username}!`,
-           [
-             {
-               text: "OK",
-               onPress: () => navigation.replace("Garage"), 
-             },
-           ]
-         );
+        Alert.alert("Login Successful", `Welcome back, ${userData.username}!`, [
+          {
+            text: "OK",
+            onPress: () => navigation.replace("Main"),
+          },
+        ]);
       } else {
         Alert.alert("Error", "User data not found.");
       }
