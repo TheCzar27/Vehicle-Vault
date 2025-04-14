@@ -16,11 +16,13 @@ import Analytics from "./src/screens/Analytics";
 import Settings from "./src/screens/Settings";
 import { StatusBar } from "expo-status-bar";
 import FilterScreen from "./src/screens/MaintenanceFilters";
+import AddVehicleScreen from "./src/screens/AddVehicleScreen";
 
 const RootStack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 const FinancesStack = createStackNavigator();
 const MaintenanceStack = createStackNavigator();
+const GarageStack = createStackNavigator();
 
 // stack nav for finanances and its subscreens
 function FinancesScreens() {
@@ -42,11 +44,20 @@ function MaintenanceScreens() {
 	);
 }
 
+function GarageScreens() {
+	return (
+		<GarageStack.Navigator screenOptions={{ headerShown: false }}>
+			<GarageStack.Screen name="GarageMain" component={GarageScreen} />
+			<GarageStack.Screen name="AddVehicle" component={AddVehicleScreen} />
+		</GarageStack.Navigator>
+	);
+}
+
 // tab nav for main screens
 function MainScreensNav() {
 	return (
-		<Tab.Navigator screenOptions={{ headerShown: false, tabBarStyle: { display: "none" }}}>
-			<Tab.Screen name="Garage" component={GarageScreen} />
+		<Tab.Navigator screenOptions={{ headerShown: false, tabBarStyle: { display: "none" } }}>
+			<Tab.Screen name="Garage" component={GarageScreens} />
 			<Tab.Screen name="Maintenance" component={MaintenanceScreens} />
 			<Tab.Screen name="Finances" component={FinancesScreens} />
 			<Tab.Screen name="Map" component={Map} />
