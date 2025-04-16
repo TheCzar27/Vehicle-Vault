@@ -13,11 +13,12 @@
     "@react-native-community/checkbox": "^0.5.17",
     "@react-navigation/native": "^7.0.14",
     "@react-navigation/stack": "^7.1.1",
-    "axios": "^1.7.9",
+    "axios": "^1.8.4",
     "expo": "~52.0.27",
     "expo-auth-session": "^6.0.3",
     "expo-font": "^13.0.3",
     "expo-linear-gradient": "~14.0.2",
+    "expo-location": "^18.0.10",
     "expo-navigation-bar": "~4.0.7",
     "expo-router": "^4.0.17",
     "expo-status-bar": "~2.0.1",
@@ -38,7 +39,8 @@
     "react-native-screens": "~4.4.0",
     "react-native-ui-datepicker": "^3.0.5",
     "react-native-vector-icons": "^10.2.0",
-    "styled-components": "^5.3.11"
+    "styled-components": "^5.3.11",
+    "react-native-maps": "1.18.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

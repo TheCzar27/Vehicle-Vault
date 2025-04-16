@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   SafeAreaView,
   ScrollView,
@@ -7,24 +7,45 @@ import {
   Text,
   Switch,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import TopBar from "../components/TopBar";
 import BottomBar from "../components/BottomBar";
 import { StatusBar } from "expo-status-bar";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function LocationSettingsScreen() {
-    const navigation = useNavigation();
 
-    const [locationEnabled, setLocationEnabled] = useState(false);
+    const [locationEnabled, setLocationEnabled] = useState(false); // defaults as off
+
+    useEffect(() => {
+      (async () => {
+        try {
+          const storedValue = await AsyncStorage.getItem("locationEnabled");
+          if (storedValue !== null) {
+            setLocationEnabled(JSON.parse(storedValue));
+          }
+        } catch (err) {
+          console.warn("Failed to load stored location setting:", err);
+        }
+      })();
+    }, []);
+
+    const handleToggle = async (newValue) => {
+      setLocationEnabled(newValue);
+      try {
+        await AsyncStorage.setItem("locationEnabled", JSON.stringify(newValue));
+      } catch (err) {
+        console.warn("Failed to save location setting:", err);
+      }
+    };
 
     const locationSettingsOptions = [
-        {
-            label: "Enable Location Services",
-            icon: "map",
-            value: locationEnabled,
-            onValueChange: () => setLocationEnabled((prev) => !prev),
-        },
+      {
+        label: "Enable Location Services",
+        icon: "map",
+        value: locationEnabled,
+        onValueChange: handleToggle,
+      },
     ];
 
     return (
