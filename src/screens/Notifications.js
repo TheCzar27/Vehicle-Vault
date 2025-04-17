@@ -17,10 +17,8 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 export default function NotificationsScreen() {
   const navigation = useNavigation();
 
-  // list of notification options, all initially set to be disabled
-  const [pushEnabled, setPushEnabled] = useState(false);
+  // list of notification options, both initially set to be disabled
   const [emailEnabled, setEmailEnabled] = useState(false);
-  const [smsEnabled, setSMSEnabled] = useState(false);
 
   const NOTI_CATEGORIES = [
     {
@@ -79,7 +77,7 @@ export default function NotificationsScreen() {
   // determines if user has any type of notis enabled
   // if they do, then it will display the different categories
   // if not, then they will remain hidden
-  const anyNotificationEnabled = pushEnabled || emailEnabled || smsEnabled;
+  const anyNotificationEnabled = emailEnabled;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -88,13 +86,6 @@ export default function NotificationsScreen() {
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Different Types of notification selection */}
-        <View style={styles.masterToggleRow}>
-          <View style={styles.iconContainer}>
-            <MaterialCommunityIcons name="bell-outline" size={26} color="#000" />
-          </View>
-          <Text style={styles.masterToggleLabel}>Enable Push Notifications</Text>
-          <Switch value={pushEnabled} onValueChange={() => setPushEnabled((prev) => !prev)} />
-        </View>
 
         <View style={styles.masterToggleRow}>
           <View style={styles.iconContainer}>
@@ -102,14 +93,6 @@ export default function NotificationsScreen() {
           </View>
           <Text style={styles.masterToggleLabel}>Enable Email Notifications</Text>
           <Switch value={emailEnabled} onValueChange={() => setEmailEnabled((prev) => !prev)} />
-        </View>
-
-        <View style={styles.masterToggleRow}>
-          <View style={styles.iconContainer}>
-            <MaterialCommunityIcons name="message-text-outline" size={26} color="#000" />
-          </View>
-          <Text style={styles.masterToggleLabel}>Enable SMS Notifications</Text>
-          <Switch value={smsEnabled} onValueChange={() => setSMSEnabled((prev) => !prev)} />
         </View>
 
         {/* SUB-CATEGORIES (MAINTENANCE, FINANCE, GARAGE) */}

@@ -78,11 +78,6 @@ export default function SettingsScreen() {
       onPress: () => navigation.navigate("LocationSettings"),
     },
     {
-      label: "Display Settings",
-      icon: "tune",
-      onPress: () => navigation.navigate("DisplaySettings"),
-    },
-    {
       label: "Terms of Services",
       icon: "file-document-outline",
       onPress: () => navigation.navigate("TermsOfServices"),
