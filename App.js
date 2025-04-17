@@ -103,9 +103,9 @@ export default function App() {
         <StatusBar backgroundColor="#D9D9D9" />
         <NavigationContainer>
           <RootStack.Navigator screenOptions={{ headerShown: false }}>
-            <RootStack.Screen name="Welcome" component={WelcomeScreen} />
+            {/* <RootStack.Screen name="Welcome" component={WelcomeScreen} />
             <RootStack.Screen name="LogIn" component={LogInScreen} />
-            <RootStack.Screen name="Register" component={RegisterScreen} />
+            <RootStack.Screen name="Register" component={RegisterScreen} /> */}
             {/* Main app screens */}
             <RootStack.Screen name="Main" component={MainScreensNav} />
           </RootStack.Navigator>

@@ -9,21 +9,21 @@ import {
 	Image,
 	TouchableOpacity,
 	Pressable,
+	Modal,
+	TextInput,
+	Keyboard,
 } from "react-native";
 import TopBar from "../components/TopBar";
 import BottomBar from "../components/BottomBar";
 import Card from "../components/Card";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
-import { useSmartCarAuth } from "../utils/smartcarAuth";
 import { auth } from "../config/firebaseConfig";
-import { fetchVehicleData } from "../utils/fetchVehicleData";
 import { FilterContext } from "../utils/FilterContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
 
 export default function MaintenanceScreen({ navigation }) {
-	const { request, promptAsync } = useSmartCarAuth();
 	const user = auth.currentUser;
 	const [showAlerts, setShowAlerts] = useState(false);
 	const [showTireAlert, setShowTireAlert] = useState(false);
@@ -127,6 +127,17 @@ export default function MaintenanceScreen({ navigation }) {
 		}, [])
 	);
 
+	const [showModal, setShowModal] = useState(false);
+	const [servicedLife, setServicedLife] = useState(0);
+
+	function toggleModal() {
+		console.log(showModal);
+		if (showModal) setShowModal(false);
+		else setShowModal(true);
+	}
+
+	const handleSubmit = () => {};
+
 	return (
 		<SafeAreaView style={styles.container}>
 			<TopBar
@@ -136,21 +147,6 @@ export default function MaintenanceScreen({ navigation }) {
 			/>
 
 			<ScrollView contentContainerStyle={styles.scrollContent}>
-				{/* <View
-					style={{
-						flex: 1,
-						justifyContent: "center",
-						alignItems: "center",
-						gap: 8,
-					}}
-				>
-					<Button title="Log Vehicle Data" onPress={() => promptAsync()} disabled={!request} />
-					<Button
-						title="Store tests tokens"
-						onPress={() => fetchVehicleData()}
-						disabled={!request}
-					/>
-				</View> */}
 				{showAlerts && (
 					<View style={styles.alertContainer}>
 						{showTireAlert && <Text style={styles.alertText}>Check tire air pressure</Text>}
@@ -168,45 +164,47 @@ export default function MaintenanceScreen({ navigation }) {
 					</View>
 				)}
 				{showTires && (
-					<View style={styles.tirecontainer}>
-						<Text style={styles.title}>Tires</Text>
-						<View style={styles.lowerContainer}>
-							<View style={styles.leftcontainer}>
-								<View style={styles.innercontainer}>
-									<Text style={styles.percentage}>{FLTirePressure}</Text>
-									<View
-										style={[styles.wheels, FLTirePressure < 20 && { backgroundColor: "#ff3030" }]}
+					<Pressable onPress={() => toggleModal()}>
+						<View style={styles.tirecontainer}>
+							<Text style={styles.title}>Tires</Text>
+							<View style={styles.lowerContainer}>
+								<View style={styles.leftcontainer}>
+									<View style={styles.innercontainer}>
+										<Text style={styles.percentage}>{FLTirePressure}</Text>
+										<View
+											style={[styles.wheels, FLTirePressure < 20 && { backgroundColor: "#ff3030" }]}
+										/>
+									</View>
+									<View style={styles.innercontainer}>
+										<Text style={styles.percentage}>{BLTirePressure}</Text>
+										<View
+											style={[styles.wheels, BLTirePressure < 20 && { backgroundColor: "#ff3030" }]}
+										/>
+									</View>
+								</View>
+								<View style={styles.imagecontainer}>
+									<Image
+										source={require("../../assets/car.png")}
+										style={{ height: 150, width: 73 }}
 									/>
 								</View>
-								<View style={styles.innercontainer}>
-									<Text style={styles.percentage}>{BLTirePressure}</Text>
-									<View
-										style={[styles.wheels, BLTirePressure < 20 && { backgroundColor: "#ff3030" }]}
-									/>
-								</View>
-							</View>
-							<View style={styles.imagecontainer}>
-								<Image
-									source={require("../../assets/car.png")}
-									style={{ height: 150, width: 73 }}
-								/>
-							</View>
-							<View style={styles.rightcontainer}>
-								<View style={styles.innercontainer}>
-									<View
-										style={[styles.wheels, FRTirePressure < 20 && { backgroundColor: "#ff3030" }]}
-									/>
-									<Text style={styles.percentage}>{FRTirePressure}</Text>
-								</View>
-								<View style={styles.innercontainer}>
-									<View
-										style={[styles.wheels, BRTirePressure < 20 && { backgroundColor: "#ff3030" }]}
-									/>
-									<Text style={styles.percentage}>{BRTirePressure}</Text>
+								<View style={styles.rightcontainer}>
+									<View style={styles.innercontainer}>
+										<View
+											style={[styles.wheels, FRTirePressure < 20 && { backgroundColor: "#ff3030" }]}
+										/>
+										<Text style={styles.percentage}>{FRTirePressure}</Text>
+									</View>
+									<View style={styles.innercontainer}>
+										<View
+											style={[styles.wheels, BRTirePressure < 20 && { backgroundColor: "#ff3030" }]}
+										/>
+										<Text style={styles.percentage}>{BRTirePressure}</Text>
+									</View>
 								</View>
 							</View>
 						</View>
-					</View>
+					</Pressable>
 				)}
 
 				{showBrakePads && (
@@ -307,6 +305,38 @@ export default function MaintenanceScreen({ navigation }) {
 				)}
 				{/* more cards later */}
 			</ScrollView>
+			<Modal visible={showModal} animationType="fade" transparent={true}>
+				<View style={styles.modalContainer}>
+					<View style={styles.modalContent}>
+						<Text style={styles.modalTitle}>Tire status</Text>
+						<Text style={{ marginBottom: 5, fontSize: 16 }}>ugy</Text>
+						<TextInput
+							style={styles.input}
+							placeholder=""
+							placeholderTextColor={"#555"}
+							// pull default value from db
+							defaultValue="15000"
+							value={servicedLife}
+							onChangeText={setServicedLife}
+							keyboardType="numeric"
+							returnKeyType="done"
+							blurOnSubmit={true}
+							onSubmitEditing={Keyboard.dismiss}
+						/>
+						<Text style={{ color: "#555", fontSize: 12, marginBottom: -10 }}>
+							Pressing confirm sets date and mileage serviced on this item to current
+						</Text>
+						<View style={styles.buttonContainer}>
+							<TouchableOpacity style={styles.addButton} onPress={handleSubmit}>
+								<Text style={styles.buttonText}>Confirm</Text>
+							</TouchableOpacity>
+							<TouchableOpacity style={styles.cancelButton} onPress={() => toggleModal()}>
+								<Text style={styles.buttonText}>Cancel</Text>
+							</TouchableOpacity>
+						</View>
+					</View>
+				</View>
+			</Modal>
 			<BottomBar />
 		</SafeAreaView>
 	);
@@ -428,5 +458,51 @@ const styles = StyleSheet.create({
 		width: 300,
 		textAlign: "center",
 		borderRadius: 8,
+	},
+	modalContainer: {
+		flex: 1,
+		backgroundColor: "rgba(0, 0, 0, 0.5)",
+		justifyContent: "center",
+		alignItems: "center",
+	},
+	modalContent: {
+		width: "90%",
+		backgroundColor: "#FFFFFF",
+		borderRadius: 10,
+		padding: 20,
+	},
+	modalTitle: {
+		fontSize: 20,
+		fontWeight: "bold",
+		marginBottom: 20,
+		textAlign: "center",
+	},
+	input: {
+		borderWidth: 1,
+		borderColor: "#D9D9D9",
+		borderRadius: 5,
+		padding: 10,
+		marginBottom: 15,
+		fontSize: 16,
+	},
+	buttonContainer: {
+		flexDirection: "row",
+		justifyContent: "space-around",
+		marginTop: 20,
+	},
+	addButton: {
+		backgroundColor: "#4682B4",
+		borderRadius: 5,
+		padding: 10,
+	},
+	cancelButton: {
+		backgroundColor: "#B0E0E6",
+		borderRadius: 5,
+		padding: 10,
+	},
+	buttonText: {
+		color: "#FFFFFF",
+		fontWeight: "bold",
+		textAlign: "center",
 	},
 });
