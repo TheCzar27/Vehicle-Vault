@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { SafeAreaView, TextInput, Text, View, ScrollView, StyleSheet, Alert } from "react-native";
+import { SafeAreaView, TextInput, Text, View, ScrollView, StyleSheet, Alert, TouchableOpacity } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import axios from "axios";
@@ -9,12 +9,16 @@ import FilterCheckbox from "../components/FilterCheckbox";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { useNavigation } from "@react-navigation/native";
+import LocationSettingsScreen from "../screens/LocationSettings"
 
 const GOOGLE_API_KEY = "AIzaSyDdd_L4HDBlllc885zSEEqZEr_IX9zVGeY"; // API key using Places API, Maps SDK for Android, and Geocoding API
 
 export default function NearbyAutoShops() {
 
-const [locationEnabled, setLocationEnabled] = useState(null);
+  const navigation = useNavigation();
+
+  const [locationEnabled, setLocationEnabled] = useState(null);
   const [searchText, setSearchText] = useState(""); //tracks text entered in search input to look up address
   const [location, setLocation] = useState(null);
   const [region, setRegion] = useState(null); //region to be displayed on map
@@ -150,28 +154,29 @@ const [locationEnabled, setLocationEnabled] = useState(null);
   };
   
   if (!locationEnabled) {
-    if (!locationEnabled) {
-        return (
-          <SafeAreaView style={styles.container}>
-            <TopBar headingTitle="Nearby Auto Shops & Gas Stations" />
-      
-            <View style={styles.disabledContent}>
-              <MaterialCommunityIcons
-                name="alert-circle-outline"
-                size={64}
-                color="#999"
-                style={{ marginBottom: 16 }}
-              />
-              <Text style={styles.disabledText}>
-                You need to have location settings enabled to view Auto Shops and Gas Stations nearby.
-              </Text>
-            </View>
-      
-            <BottomBar />
-          </SafeAreaView>
-        );
-      }
-      
+    return (
+      <SafeAreaView style={styles.container}>
+        <TopBar headingTitle="Nearby Auto Shops & Gas Stations" />
+  
+        <View style={styles.disabledContent}>
+          <MaterialCommunityIcons
+            name="alert-circle-outline"
+            size={64}
+            color="#999"
+            style={{ marginBottom: 16 }}
+          />
+          <Text style={styles.disabledText} >You need to have location services enabled to view Auto Shops and Gas Stations nearby. </Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Settings', {screen: 'LocationSettings'})} >
+            <Text style={styles.navigateLocationSettingsText}>
+              Enable Location Services
+            </Text>
+          </TouchableOpacity>
+        </View>
+  
+        <BottomBar />
+      </SafeAreaView>
+    );
+  
   }
 
 	return (
@@ -257,4 +262,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     textAlign: "center",
   },
+  navigateLocationSettingsText: {
+    fontSize: 20,
+    paddingTop: 20,
+    textAlign: "center",
+    fontWeight: "bold",
+    color: "blue",
+    textDecorationLine: 'underline',
+  }
 });
