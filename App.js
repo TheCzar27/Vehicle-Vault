@@ -35,12 +35,16 @@ const SettingsStack = createStackNavigator();
 // stack nav for finanances and its subscreens
 function FinancesScreens() {
 	return (
-		<FinancesStack.Navigator screenOptions={{ headerShown: false }}>
-			<FinancesStack.Screen name="FinanceMain" component={Finances} />
-			<FinancesStack.Screen name="Analytics" component={Analytics} />
-			<FinancesStack.Screen name="AddPayment" component={AddPayment} />
-		</FinancesStack.Navigator>
-	);
+    <FinancesStack.Navigator screenOptions={{ headerShown: false }}>
+      <FinancesStack.Screen name="FinanceMain" component={Finances} />
+      <FinancesStack.Screen name="Analytics" component={Analytics} />
+      <FinancesStack.Screen
+        name="AddPayment"
+        component={AddPayment}
+        options={{ headerShown: true }}
+      />
+    </FinancesStack.Navigator>
+  );
 }
 
 function MaintenanceScreens() {
@@ -103,9 +107,9 @@ export default function App() {
         <StatusBar backgroundColor="#D9D9D9" />
         <NavigationContainer>
           <RootStack.Navigator screenOptions={{ headerShown: false }}>
-            {/* <RootStack.Screen name="Welcome" component={WelcomeScreen} />
+            <RootStack.Screen name="Welcome" component={WelcomeScreen} />
             <RootStack.Screen name="LogIn" component={LogInScreen} />
-            <RootStack.Screen name="Register" component={RegisterScreen} /> */}
+            <RootStack.Screen name="Register" component={RegisterScreen} />
             {/* Main app screens */}
             <RootStack.Screen name="Main" component={MainScreensNav} />
           </RootStack.Navigator>
