@@ -1,43 +1,55 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import {SafeAreaView} from "react-native-safe-area-context";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
 
-export default function TopBar({headingTitle, pressableIcon, iconFunction, showBack=false}) {
+export default function TopBar({ headingTitle, onSwitchPress, onAddPress }) {
+  return (
+    <View style={styles.container}>
+      <View style={styles.leftGroup}>
+        <Text style={styles.title}>{headingTitle}</Text>
+      </View>
 
-    const navigation = useNavigation();
-
-    return (
-        <SafeAreaView style={{ backgroundColor: "#D9D9D9" }}>
-            <View style={styles.container}>
-                {/* adds a back arrow on the top bar to navigate back to the previous screen*/}
-                {showBack && (
-                    <TouchableOpacity onPress={() => navigation.goBack()}
-                    style={{ marginRight: 12 }} >
-                        <MaterialCommunityIcons name="arrow-left" size={26} color="#000" />
-                    </TouchableOpacity>
-                )}
-                <Text style={styles.title}>{headingTitle}</Text>
-                <TouchableOpacity onPress={iconFunction}>
-                    <Ionicons name={pressableIcon} size={24} color="black" />
-                </TouchableOpacity>
-            </View>
-        </SafeAreaView>
-    );
+      <View style={styles.rightGroup}>
+        {onSwitchPress && (
+          <TouchableOpacity onPress={onSwitchPress} style={styles.icon}>
+            <Ionicons name="car" size={24} color="#000" />
+          </TouchableOpacity>
+        )}
+        {onAddPress && (
+          <TouchableOpacity onPress={onAddPress} style={styles.icon}>
+            <Ionicons name="add" size={24} color="#000" />
+          </TouchableOpacity>
+        )}
+      </View>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        paddingBottom: 20,
-        paddingHorizontal: 20,
-        backgroundColor: "#D9D9D9",
-    },
-    title: {
-        fontSize: 20,
-        fontWeight: "bold",
-    },
+  container: {
+    height: 60,
+    paddingHorizontal: 16,
+    backgroundColor: "#fff",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    borderBottomWidth: 1,
+    borderColor: "#ccc",
+  },
+  leftGroup: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginRight: 10,
+  },
+  rightGroup: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  icon: {
+    paddingLeft: 10,
+  },
 });

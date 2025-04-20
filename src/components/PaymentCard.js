@@ -1,21 +1,40 @@
 import React from "react";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
-export default function PaymentCard({ category, name, amount, date, notes }) {
-  const [month] = [date[0] + date[1]];
-  const [day] = [date[2] + date[3]];
-  const [year] = [date[4] + date[5] + date[6] + date[7]];
+export default function PaymentCard({
+  category,
+  name,
+  amount,
+  date,
+  notes,
+  id,
+  onDelete,
+}) {
+  const formattedDate = date ? date.split("-") : ["00", "00", "0000"];
+  const [month, day, year] = formattedDate;
 
   return (
     <View style={styles.container}>
-      <Text style={styles.name}>{name}</Text>
+      <View style={styles.upperContainer}>
+        <Text style={styles.name}>{name}</Text>
+        <TouchableOpacity
+          style={styles.deleteBtn}
+          onPress={() => {
+            onDelete(id);
+            console.log("Delete pressed.");
+          }}
+        >
+          <MaterialCommunityIcons name={"delete"} size={24} color="black" />
+        </TouchableOpacity>
+      </View>
       <View style={styles.innerContainer}>
         <View style={styles.leftView}>
           <Text style={styles.text}>{category}</Text>
           <Text style={styles.text}>{notes}</Text>
         </View>
         <View style={styles.rightView}>
-          <Text style={styles.text}>${amount}</Text>
+          <Text style={styles.text}>${parseFloat(amount).toFixed(2)}</Text>
           <Text style={styles.text}>
             {month}/{day}/{year}
           </Text>
@@ -28,15 +47,23 @@ export default function PaymentCard({ category, name, amount, date, notes }) {
 const styles = StyleSheet.create({
   container: {
     borderWidth: 2,
-    borderRadius: 10,
     borderColor: "#D9D9D9",
     padding: 15,
-    marginTop: 10,
-    marginBottom: 10,
+    margin: 10,
+    borderRadius: 10,
+  },
+  upperContainer: {
+    display: "flex",
+    flexDirection: "row",
   },
   name: {
     fontSize: 18,
     fontWeight: 500,
+    marginBottom: 5,
+  },
+  deleteBtn: {
+    flex: 1,
+    alignItems: "flex-end",
     marginBottom: 5,
   },
   innerContainer: {

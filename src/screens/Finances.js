@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ScrollView,
   Text,
@@ -11,17 +11,65 @@ import { StatusBar } from "expo-status-bar";
 import TopBar from "../components/TopBar";
 import BottomBar from "../components/BottomBar";
 import PaymentCard from "../components/PaymentCard";
-import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import "react-native-get-random-values";
+import uuid from "react-native-uuid";
+import { auth, db } from "../config/firebaseConfig";
+import {
+  collection,
+  getDocs,
+  doc,
+  setDoc,
+  deleteDoc,
+  updateDoc,
+  query,
+  where,
+} from "firebase/firestore";
+import { useVehicleContext } from "../utils/VehicleContext";
 
 export default function FinancesScreen({ navigation }) {
+  const user = auth.currentUser;
+  const { selectedVehicleId } = useVehicleContext();
   const [payments, setPayments] = useState([]);
 
-  const addPayment = (newPayment) => {
-    setPayments([...payments, newPayment]);
+ useEffect(() => {
+   if (user?.uid && selectedVehicleId) {
+     fetchPayments(user.uid, selectedVehicleId);
+   }
+ }, [user?.uid, selectedVehicleId]);
+
+
+  // fetch payments for current user
+  const fetchPayments = async (userId, vehicleId) => {
+    try {
+      const q = query(
+        collection(db, "payments"),
+        where("userId", "==", userId),
+        where("vehicleId",  "==", vehicleId )
+      );
+      const querySnapshot = await getDocs(q);
+      const fetchedPayments = querySnapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setPayments(fetchedPayments);
+    } catch (error) {
+      console.log("Error fetching payments: ", error);
+    }
   };
 
-  const deletePayment = (index) => {
+  const addPayment = async (newPayment) => {
+    if (user) {
+      const userPayments = doc(db, "payments", uuid.v4());
+      await setDoc(userPayments, {
+        ...newPayment,
+        userId: user.uid,
+        vehicleId: selectedVehicleId,
+      });
+fetchPayments(user.uid, selectedVehicleId);
+    }
+  };
+
+  const deletePayment = (id) => {
     {
       Alert.alert(
         "Delete this item?",
@@ -31,9 +79,12 @@ export default function FinancesScreen({ navigation }) {
           {
             text: "Delete",
             style: "destructive",
-            onPress: () => {
-              const updatedPayments = payments.filter((_, i) => i !== index);
-              setPayments(updatedPayments);
+            onPress: async () => {
+              console.log("Deleted payment.");
+              await deleteDoc(doc(db, "payments", id));
+              setPayments((prevPayments) =>
+                prevPayments.filter((p) => p.id !== id)
+              );
             },
           },
         ]
@@ -41,24 +92,40 @@ export default function FinancesScreen({ navigation }) {
     }
   };
 
-  const renderRightActions = (index) => {
-    return (
-      <TouchableOpacity
-        style={styles.deleteBtn}
-        onPress={() => deletePayment(index)}
-      >
-        <MaterialCommunityIcons name={"delete"} size={24} color="black" />
-      </TouchableOpacity>
-    );
-  };
+  // update payment type if date has past
+  useEffect(() => {
+    const updatedPayments = payments.map((payment) => {
+      const today = new Date();
+      const [month, day, year] = payment.date ? payment.date.split("-") : ["0000", "00", "00"];
+      const payDate = new Date(year, month - 1, day);
+
+      if (today > payDate) {
+        return { ...payment, type: "Past" };
+      }
+      return payment;
+    });
+
+    const updated = updatedPayments.some((p, i) => p.type !== payments[i].type);
+
+    if (updated) {
+      setPayments(updatedPayments);
+
+      updatedPayments.forEach(async (payment) => {
+        if (payment.type === "Past") {
+          const ref = doc(db, "payments", payment.id);
+          await updateDoc(ref, { type: "Past" });
+        }
+      });
+    }
+  }, [payments]);
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar animated backgroundColor={"#D9D9D9"} />
       <TopBar
         headingTitle="Finances"
-        pressableIcon={"add-outline"}
-        iconFunction={() => navigation.navigate("AddPayment", { addPayment })}
+        onSwitchPress={() => navigation.navigate("SelectVehicle")}
+        onAddPress={() => navigation.navigate("AddPayment", { addPayment })}
       />
 
       <TouchableOpacity
@@ -74,28 +141,22 @@ export default function FinancesScreen({ navigation }) {
         <Text style={styles.text}>Upcoming</Text>
         {payments
           .filter((payment) => payment.type === "Upcoming")
-          .map((payment, index) => (
-            <ReanimatedSwipeable
-              key={index}
-              renderRightActions={() => renderRightActions(index)}
-              friction={2}
-              rightThreshold={40}
-            >
-              <PaymentCard key={index} {...payment} />
-            </ReanimatedSwipeable>
+          .map((payment) => (
+            <PaymentCard
+              key={payment.id}
+              {...payment}
+              onDelete={deletePayment}
+            />
           ))}
         <Text style={styles.text}>Past</Text>
         {payments
           .filter((payment) => payment.type === "Past")
-          .map((payment, index) => (
-            <ReanimatedSwipeable
-              key={index}
-              renderRightActions={() => renderRightActions(index)}
-              friction={2}
-              rightThreshold={40}
-            >
-              <PaymentCard key={index} {...payment} />
-            </ReanimatedSwipeable>
+          .map((payment) => (
+            <PaymentCard
+              key={payment.id}
+              {...payment}
+              onDelete={deletePayment}
+            />
           ))}
       </ScrollView>
       <BottomBar />
@@ -118,17 +179,9 @@ const styles = StyleSheet.create({
     height: "75%",
   },
   text: {
-    fontSize: 20,
+    fontSize: 22,
     padding: 10,
-  },
-  deleteBtn: {
-    backgroundColor: "rgb(212, 67, 67)",
-    borderRadius: 10,
-    margin: 10,
-    marginLeft: 0,
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    width: 80,
+    marginBottom: 6,
+    marginTop: 6,
   },
 });
