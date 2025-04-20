@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import * as AuthSession from "expo-auth-session";
 import { storeAuthTokens } from "./storeAuthTokens";
 
-const CLIENT_ID = "6020bae4-b2e3-4139-8e2f-8b524a5f6c92";
+const CLIENT_ID = "48452ab4-a0d2-4e19-85e4-0697f8dd5ed7";
 const discovery = {
 	authorizationEndpoint: "https://connect.smartcar.com/oauth/authorize",
 	tokenEndpoint: "https://auth.smartcar.com/oauth/token",

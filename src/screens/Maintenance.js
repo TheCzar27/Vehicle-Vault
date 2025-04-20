@@ -22,324 +22,458 @@ import { auth } from "../config/firebaseConfig";
 import { FilterContext } from "../utils/FilterContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useFocusEffect } from "@react-navigation/native";
+import { db } from "../config/firebaseConfig";
+import { collection, addDoc } from "firebase/firestore";
+import { useSmartCarAuth } from "../utils/smartcarAuth";
+import { fetchVehicleData } from "../utils/fetchVehicleData";
+import { useVehicleContext } from "../utils/VehicleContext";
+import { Alert } from "react-native";
+import { getDoc, doc } from "firebase/firestore";
+import { Picker } from "@react-native-picker/picker";
+
+
+
+
+
+
+
 
 export default function MaintenanceScreen({ navigation }) {
-	const user = auth.currentUser;
-	const [showAlerts, setShowAlerts] = useState(false);
-	const [showTireAlert, setShowTireAlert] = useState(false);
-	const [showBrakeAlert, setShowBrakeAlert] = useState(false);
-	const [showOilAlert, setShowOilAlert] = useState(false);
-	const [showBatteryAlert, setShowBatteryAlert] = useState(false);
-	const [showFilterAlert, setShowFilterAlert] = useState(false);
-	const [showBeltAlert, setShowBeltAlert] = useState(false);
-	const [showSparkAlert, setShowSparkAlert] = useState(false);
-	const [showTransAlert, setShowTransAlert] = useState(false);
+  const { promptAsync } = useSmartCarAuth();
+  const user = auth.currentUser;
+  const { selectedVehicleId, vehicleList, setSelectedVehicleId } =
+    useVehicleContext();
+  const [showAlerts, setShowAlerts] = useState(false);
+  const [showTireAlert, setShowTireAlert] = useState(false);
+  const [showBrakeAlert, setShowBrakeAlert] = useState(false);
+  const [showOilAlert, setShowOilAlert] = useState(false);
+  const [showBatteryAlert, setShowBatteryAlert] = useState(false);
+  const [showFilterAlert, setShowFilterAlert] = useState(false);
+  const [showBeltAlert, setShowBeltAlert] = useState(false);
+  const [showSparkAlert, setShowSparkAlert] = useState(false);
+  const [showTransAlert, setShowTransAlert] = useState(false);
 
-	const {
-		showOil,
-		showFilter,
-		showTires,
-		showTimingBelt,
-		showSparkPlugs,
-		showTransFluid,
-		showCoolant,
-		showBattery,
-		showBrakePads,
-	} = useContext(FilterContext);
+  const {
+    showOil,
+    showFilter,
+    showTires,
+    showTimingBelt,
+    showSparkPlugs,
+    showTransFluid,
+    showCoolant,
+    showBattery,
+    showBrakePads,
+  } = useContext(FilterContext);
 
-	// testing values, will be pulled from DB later
-	const [FLTirePressure, setFLTirePressure] = useState(18);
-	const [FRTirePressure, setFRTirePressure] = useState(39);
-	const [BLTirePressure, setBLTirePressure] = useState(38);
-	const [BRTirePressure, setBRTirePressure] = useState(37);
-	const [mileage, setMileage] = useState(10000);
-	const [oilPercent, setOilPercent] = useState(80);
-	const [oilLastChange, setOilLastChange] = useState(24000);
-	const [oilLife, setOilLife] = useState(6000);
-	const [breakLastChange, setBreakLastChange] = useState(30000);
-	const [batteryLastChange, setBatteryLastChange] = useState(new Date(2024, 5, 24)); // 5/24/2024
-	const [filterLastChange, setFilterLastChange] = useState(18000);
-	const [beltLastChange, setBeltLastChange] = useState(18000);
-	const [sparkLastChange, setSparkLastChange] = useState(18000);
-	const [transLastChange, setTransLastChange] = useState(18000);
+  // testing values, will be pulled from DB later
+  const [FLTirePressure, setFLTirePressure] = useState(18);
+  const [FRTirePressure, setFRTirePressure] = useState(39);
+  const [BLTirePressure, setBLTirePressure] = useState(38);
+  const [BRTirePressure, setBRTirePressure] = useState(37);
+  const [mileage, setMileage] = useState(10000);
+  const [oilPercent, setOilPercent] = useState(80);
+  const [oilLastChange, setOilLastChange] = useState(24000);
+  const [oilLife, setOilLife] = useState(6000);
+  const [breakLastChange, setBreakLastChange] = useState(30000);
+  const [batteryLastChange, setBatteryLastChange] = useState(
+    new Date(2024, 5, 24)
+  ); // 5/24/2024
+  const [filterLastChange, setFilterLastChange] = useState(18000);
+  const [beltLastChange, setBeltLastChange] = useState(18000);
+  const [sparkLastChange, setSparkLastChange] = useState(18000);
+  const [transLastChange, setTransLastChange] = useState(18000);
 
-	// Recalculate alert conditions whenever dependent state variables change
-	useEffect(() => {
-		// Compute the battery expiration date based on the current batteryLastChange
-		const batteryExpirationDate = new Date(batteryLastChange);
-		batteryExpirationDate.setFullYear(batteryExpirationDate.getFullYear() + 5);
+  // Recalculate alert conditions whenever dependent state variables change
+  useEffect(() => {
+    // Compute the battery expiration date based on the current batteryLastChange
+    const batteryExpirationDate = new Date(batteryLastChange);
+    batteryExpirationDate.setFullYear(batteryExpirationDate.getFullYear() + 5);
 
-		// Compute alert conditions locally
-		const tireAlert =
-			FLTirePressure < 20 || FRTirePressure < 20 || BLTirePressure < 20 || BRTirePressure < 20;
-		const oilAlert = oilPercent < 20 || mileage - oilLastChange >= oilLife;
-		const brakeAlert = mileage - breakLastChange >= 50000;
-		const batteryAlert = new Date() >= batteryExpirationDate;
-		const filterAlert = mileage - filterLastChange >= 15000;
-		const beltAlert = mileage - beltLastChange >= 85000;
-		const sparkAlert = mileage - sparkLastChange >= 80000;
-		const transAlert = mileage - transLastChange >= 45000;
+    // Compute alert conditions locally
+    const tireAlert =
+      FLTirePressure < 20 ||
+      FRTirePressure < 20 ||
+      BLTirePressure < 20 ||
+      BRTirePressure < 20;
+    const oilAlert = oilPercent < 20 || mileage - oilLastChange >= oilLife;
+    const brakeAlert = mileage - breakLastChange >= 50000;
+    const batteryAlert = new Date() >= batteryExpirationDate;
+    const filterAlert = mileage - filterLastChange >= 15000;
+    const beltAlert = mileage - beltLastChange >= 85000;
+    const sparkAlert = mileage - sparkLastChange >= 80000;
+    const transAlert = mileage - transLastChange >= 45000;
 
-		// Update individual alert state variables
-		setShowTireAlert(tireAlert);
-		setShowOilAlert(oilAlert);
-		setShowBrakeAlert(brakeAlert);
-		setShowBatteryAlert(batteryAlert);
-		setShowFilterAlert(filterAlert);
-		setShowBeltAlert(beltAlert);
-		setShowSparkAlert(sparkAlert);
-		setShowTransAlert(transAlert);
+    // Update individual alert state variables
+    setShowTireAlert(tireAlert);
+    setShowOilAlert(oilAlert);
+    setShowBrakeAlert(brakeAlert);
+    setShowBatteryAlert(batteryAlert);
+    setShowFilterAlert(filterAlert);
+    setShowBeltAlert(beltAlert);
+    setShowSparkAlert(sparkAlert);
+    setShowTransAlert(transAlert);
 
-		// Set overall alerts state if any condition is met
-		setShowAlerts(
-			tireAlert ||
-				oilAlert ||
-				brakeAlert ||
-				batteryAlert ||
-				filterAlert ||
-				beltAlert ||
-				sparkAlert ||
-				transAlert
-		);
-	}, [
-		FLTirePressure,
-		FRTirePressure,
-		BLTirePressure,
-		BRTirePressure,
-		mileage,
-		oilPercent,
-		oilLastChange,
-		oilLife,
-		breakLastChange,
-		batteryLastChange,
-		filterLastChange,
-		beltLastChange,
-		sparkLastChange,
-		transLastChange,
-	]);
+    // Set overall alerts state if any condition is met
+    setShowAlerts(
+      tireAlert ||
+        oilAlert ||
+        brakeAlert ||
+        batteryAlert ||
+        filterAlert ||
+        beltAlert ||
+        sparkAlert ||
+        transAlert
+    );
+  }, [
+    FLTirePressure,
+    FRTirePressure,
+    BLTirePressure,
+    BRTirePressure,
+    mileage,
+    oilPercent,
+    oilLastChange,
+    oilLife,
+    breakLastChange,
+    batteryLastChange,
+    filterLastChange,
+    beltLastChange,
+    sparkLastChange,
+    transLastChange,
+  ]);
 
-	useFocusEffect(
-		useCallback(() => {
-			// logic when screen is focused
-			// update values from the database when the screen is focused
-			console.log("Maintenance is focused");
-			// If you need to manually trigger alerts after a DB fetch, call handleAlerts here or rely on the useEffect above.
-		}, [])
-	);
+  useFocusEffect(
+    useCallback(() => {
+      // logic when screen is focused
+      // update values from the database when the screen is focused
+      console.log("Maintenance is focused");
+      // If you need to manually trigger alerts after a DB fetch, call handleAlerts here or rely on the useEffect above.
+    }, [])
+  );
 
-	const [showModal, setShowModal] = useState(false);
-	const [servicedLife, setServicedLife] = useState(0);
+  const [showModal, setShowModal] = useState(false);
+  const [servicedLife, setServicedLife] = useState(0);
 
-	function toggleModal() {
-		console.log(showModal);
-		if (showModal) setShowModal(false);
-		else setShowModal(true);
-	}
+  function toggleModal() {
+    console.log(showModal);
+    if (showModal) setShowModal(false);
+    else setShowModal(true);
+  }
 
-	const handleSubmit = () => {};
+  const handleSmartCarConnect = async () => {
+    if (!selectedVehicleId) {
+      alert("Please select a vehicle first.");
+      return;
+    }
 
-	return (
-		<SafeAreaView style={styles.container}>
-			<TopBar
-				headingTitle="Maintenance"
-				pressableIcon={"filter"}
-				iconFunction={() => navigation.navigate("MaintenanceFilters")}
-			/>
+    const userId = auth.currentUser?.uid;
+    const tokenRef = doc(
+      db,
+      "users",
+      userId,
+      "vehicles",
+      selectedVehicleId,
+      "auth_tokens",
+      "smart_car"
+    );
+    const tokenSnap = await getDoc(tokenRef);
 
-			<ScrollView contentContainerStyle={styles.scrollContent}>
-				{showAlerts && (
-					<View style={styles.alertContainer}>
-						{showTireAlert && <Text style={styles.alertText}>Check tire air pressure</Text>}
-						{showBrakeAlert && <Text style={styles.alertText}>Check brakes for service</Text>}
-						{showOilAlert && <Text style={styles.alertText}>Oil should be changed</Text>}
-						{showBatteryAlert && <Text style={styles.alertText}>Check battery</Text>}
-						{showFilterAlert && (
-							<Text style={styles.alertText}>Cabin air filter should be replaced</Text>
-						)}
-						{showBeltAlert && <Text style={styles.alertText}>Check timing belt for service</Text>}
-						{showSparkAlert && <Text style={styles.alertText}>Check spark plugs for service</Text>}
-						{showTransAlert && (
-							<Text style={styles.alertText}>Check transmission fluid for service</Text>
-						)}
-					</View>
-				)}
-				{showTires && (
-					<Pressable onPress={() => toggleModal()}>
-						<View style={styles.tirecontainer}>
-							<Text style={styles.title}>Tires</Text>
-							<View style={styles.lowerContainer}>
-								<View style={styles.leftcontainer}>
-									<View style={styles.innercontainer}>
-										<Text style={styles.percentage}>{FLTirePressure}</Text>
-										<View
-											style={[styles.wheels, FLTirePressure < 20 && { backgroundColor: "#ff3030" }]}
-										/>
-									</View>
-									<View style={styles.innercontainer}>
-										<Text style={styles.percentage}>{BLTirePressure}</Text>
-										<View
-											style={[styles.wheels, BLTirePressure < 20 && { backgroundColor: "#ff3030" }]}
-										/>
-									</View>
-								</View>
-								<View style={styles.imagecontainer}>
-									<Image
-										source={require("../../assets/car.png")}
-										style={{ height: 150, width: 73 }}
-									/>
-								</View>
-								<View style={styles.rightcontainer}>
-									<View style={styles.innercontainer}>
-										<View
-											style={[styles.wheels, FRTirePressure < 20 && { backgroundColor: "#ff3030" }]}
-										/>
-										<Text style={styles.percentage}>{FRTirePressure}</Text>
-									</View>
-									<View style={styles.innercontainer}>
-										<View
-											style={[styles.wheels, BRTirePressure < 20 && { backgroundColor: "#ff3030" }]}
-										/>
-										<Text style={styles.percentage}>{BRTirePressure}</Text>
-									</View>
-								</View>
-							</View>
-						</View>
-					</Pressable>
-				)}
+    if (!tokenSnap.exists()) {
+      console.log("No token for this vehicle. Starting SmartCar auth...");
+      promptAsync(); // SmartCar login
+    } else {
+      console.log("Token exists, syncing vehicle data...");
+      await fetchVehicleData(selectedVehicleId);
+      Alert.alert("Vehicle data synced!");
+    }
+  };
 
-				{showBrakePads && (
-					<Card
-						IconComponent={Image}
-						icon="tire"
-						iconSize={52}
-						title="Break Pads"
-						percentage={"N/A"}
-						date="Serviced on 2/5/25"
-						imgSource={require("../../assets/break.png")}
-						style={{ height: 70, width: 70 }}
-					/>
-				)}
+  const handleSubmit = async () => {
+    if (!selectedVehicleId) {
+      alert("No vehicle selected.");
+      return;
+    }
 
-				{showOil && (
-					<Card
-						IconComponent={FontAwesome5}
-						icon="oil-can"
-						iconSize={42}
-						title="Oil"
-						percentage={"N/A"}
-						date="Last changed: 2/8/25"
-					/>
-				)}
+    try {
+      await addDoc(
+        collection(db, "vehicles", selectedVehicleId, "maintenance"),
+        {
+          type: "Tire", // You can make this dynamic later
+          mileage: mileage,
+          servicedLife: servicedLife,
+          servicedAt: new Date().toLocaleDateString(),
+        }
+      );
+      alert("Maintenance record added.");
+      setShowModal(false);
+      setServicedLife("");
+    } catch (error) {
+      console.error("Error saving maintenance record: ", error);
+      alert("Failed to save record.");
+    }
+  };
+  const pickerElement = (
+    <Picker
+      selectedValue={selectedVehicleId}
+      style={{ height: 30, width: 150, marginLeft: 10 }}
+      onValueChange={(itemValue) => setSelectedVehicleId(itemValue)}
+      mode="dropdown"
+    >
+      {(vehicleList || []).map((vehicle) => (
+        <Picker.Item
+          key={vehicle.id}
+          label={vehicle.name || "Unnamed"}
+          value={vehicle.id}
+        />
+      ))}
+    </Picker>
+  );
 
-				{showBattery && (
-					<Card
-						IconComponent={MaterialCommunityIcons}
-						icon="car-battery"
-						iconSize={52}
-						title="Battery"
-						percentage={"N/A"}
-						date="Rotate on 2/5/25"
-						lifeType="years"
-					/>
-				)}
 
-				{showFilter && (
-					<Card
-						IconComponent={MaterialCommunityIcons}
-						icon="air-filter"
-						iconSize={52}
-						title="Air Filter"
-						percentage="25%"
-						date="Last changed: 2/8/25"
-					/>
-				)}
+  return (
+    <SafeAreaView style={styles.container}>
+      <TopBar
+        headingTitle="Maintenance"
+        onSwitchPress={() => navigation.navigate("SelectVehicle")}
+        pressableIcon={"filter"}
+        iconFunction={() => navigation.navigate("MaintenanceFilters")}
+      />
+      <TouchableOpacity
+        style={styles.smartCarButton}
+        onPress={handleSmartCarConnect}
+      >
+        <Text style={styles.smartCarButtonText}>Connect to SmartCar</Text>
+      </TouchableOpacity>
 
-				{showTimingBelt && (
-					<Card
-						IconComponent={Image}
-						icon="tire"
-						iconSize={52}
-						title="Timing Belt"
-						percentage={"N/A"}
-						date="Rotate on 2/5/25"
-						imgSource={require("../../assets/timing-belt.png")}
-						style={{ height: 70, width: 70 }}
-					/>
-				)}
+      <ScrollView contentContainerStyle={styles.scrollContent}>
+        {showAlerts && (
+          <View style={styles.alertContainer}>
+            {showTireAlert && (
+              <Text style={styles.alertText}>Check tire air pressure</Text>
+            )}
+            {showBrakeAlert && (
+              <Text style={styles.alertText}>Check brakes for service</Text>
+            )}
+            {showOilAlert && (
+              <Text style={styles.alertText}>Oil should be changed</Text>
+            )}
+            {showBatteryAlert && (
+              <Text style={styles.alertText}>Check battery</Text>
+            )}
+            {showFilterAlert && (
+              <Text style={styles.alertText}>
+                Cabin air filter should be replaced
+              </Text>
+            )}
+            {showBeltAlert && (
+              <Text style={styles.alertText}>
+                Check timing belt for service
+              </Text>
+            )}
+            {showSparkAlert && (
+              <Text style={styles.alertText}>
+                Check spark plugs for service
+              </Text>
+            )}
+            {showTransAlert && (
+              <Text style={styles.alertText}>
+                Check transmission fluid for service
+              </Text>
+            )}
+          </View>
+        )}
+        {showTires && (
+          <Pressable onPress={() => toggleModal()}>
+            <View style={styles.tirecontainer}>
+              <Text style={styles.title}>Tires</Text>
+              <View style={styles.lowerContainer}>
+                <View style={styles.leftcontainer}>
+                  <View style={styles.innercontainer}>
+                    <Text style={styles.percentage}>{FLTirePressure}</Text>
+                    <View
+                      style={[
+                        styles.wheels,
+                        FLTirePressure < 20 && { backgroundColor: "#ff3030" },
+                      ]}
+                    />
+                  </View>
+                  <View style={styles.innercontainer}>
+                    <Text style={styles.percentage}>{BLTirePressure}</Text>
+                    <View
+                      style={[
+                        styles.wheels,
+                        BLTirePressure < 20 && { backgroundColor: "#ff3030" },
+                      ]}
+                    />
+                  </View>
+                </View>
+                <View style={styles.imagecontainer}>
+                  <Image
+                    source={require("../../assets/car.png")}
+                    style={{ height: 150, width: 73 }}
+                  />
+                </View>
+                <View style={styles.rightcontainer}>
+                  <View style={styles.innercontainer}>
+                    <View
+                      style={[
+                        styles.wheels,
+                        FRTirePressure < 20 && { backgroundColor: "#ff3030" },
+                      ]}
+                    />
+                    <Text style={styles.percentage}>{FRTirePressure}</Text>
+                  </View>
+                  <View style={styles.innercontainer}>
+                    <View
+                      style={[
+                        styles.wheels,
+                        BRTirePressure < 20 && { backgroundColor: "#ff3030" },
+                      ]}
+                    />
+                    <Text style={styles.percentage}>{BRTirePressure}</Text>
+                  </View>
+                </View>
+              </View>
+            </View>
+          </Pressable>
+        )}
 
-				{showSparkPlugs && (
-					<Card
-						IconComponent={Image}
-						icon="tire"
-						iconSize={52}
-						title="Spark Plugs"
-						percentage={"N/A"}
-						date="Rotate on 2/5/25"
-						imgSource={require("../../assets/spark-plug.png")}
-						style={{ height: 60, width: 60 }}
-					/>
-				)}
+        {showBrakePads && (
+          <Card
+            IconComponent={Image}
+            icon="tire"
+            iconSize={52}
+            title="Break Pads"
+            percentage={"N/A"}
+            date="Serviced on 2/5/25"
+            imgSource={require("../../assets/break.png")}
+            style={{ height: 70, width: 70 }}
+          />
+        )}
 
-				{showTransFluid && (
-					<Card
-						IconComponent={Image}
-						icon="tire"
-						iconSize={52}
-						title="Tranmission Fluid"
-						percentage={"N/A"}
-						date="Rotate on 2/5/25"
-						imgSource={require("../../assets/engine-oil.png")}
-						style={{ height: 70, width: 70 }}
-					/>
-				)}
+        {showOil && (
+          <Card
+            IconComponent={FontAwesome5}
+            icon="oil-can"
+            iconSize={42}
+            title="Oil"
+            percentage={"N/A"}
+            date="Last changed: 2/8/25"
+          />
+        )}
 
-				{showCoolant && (
-					<Card
-						IconComponent={Ionicons}
-						icon="snow-outline"
-						iconSize={52}
-						title="Engine Coolant"
-						percentage={"N/A"}
-						date="Rotate on 2/5/25"
-					/>
-				)}
-				{/* more cards later */}
-			</ScrollView>
-			<Modal visible={showModal} animationType="fade" transparent={true}>
-				<View style={styles.modalContainer}>
-					<View style={styles.modalContent}>
-						<Text style={styles.modalTitle}>Tire status</Text>
-						<Text style={{ marginBottom: 5, fontSize: 16 }}>ugy</Text>
-						<TextInput
-							style={styles.input}
-							placeholder=""
-							placeholderTextColor={"#555"}
-							// pull default value from db
-							defaultValue="15000"
-							value={servicedLife}
-							onChangeText={setServicedLife}
-							keyboardType="numeric"
-							returnKeyType="done"
-							blurOnSubmit={true}
-							onSubmitEditing={Keyboard.dismiss}
-						/>
-						<Text style={{ color: "#555", fontSize: 12, marginBottom: -10 }}>
-							Pressing confirm sets date and mileage serviced on this item to current
-						</Text>
-						<View style={styles.buttonContainer}>
-							<TouchableOpacity style={styles.addButton} onPress={handleSubmit}>
-								<Text style={styles.buttonText}>Confirm</Text>
-							</TouchableOpacity>
-							<TouchableOpacity style={styles.cancelButton} onPress={() => toggleModal()}>
-								<Text style={styles.buttonText}>Cancel</Text>
-							</TouchableOpacity>
-						</View>
-					</View>
-				</View>
-			</Modal>
-			<BottomBar />
-		</SafeAreaView>
-	);
+        {showBattery && (
+          <Card
+            IconComponent={MaterialCommunityIcons}
+            icon="car-battery"
+            iconSize={52}
+            title="Battery"
+            percentage={"N/A"}
+            date="Rotate on 2/5/25"
+            lifeType="years"
+          />
+        )}
+
+        {showFilter && (
+          <Card
+            IconComponent={MaterialCommunityIcons}
+            icon="air-filter"
+            iconSize={52}
+            title="Air Filter"
+            percentage="25%"
+            date="Last changed: 2/8/25"
+          />
+        )}
+
+        {showTimingBelt && (
+          <Card
+            IconComponent={Image}
+            icon="tire"
+            iconSize={52}
+            title="Timing Belt"
+            percentage={"N/A"}
+            date="Rotate on 2/5/25"
+            imgSource={require("../../assets/timing-belt.png")}
+            style={{ height: 70, width: 70 }}
+          />
+        )}
+
+        {showSparkPlugs && (
+          <Card
+            IconComponent={Image}
+            icon="tire"
+            iconSize={52}
+            title="Spark Plugs"
+            percentage={"N/A"}
+            date="Rotate on 2/5/25"
+            imgSource={require("../../assets/spark-plug.png")}
+            style={{ height: 60, width: 60 }}
+          />
+        )}
+
+        {showTransFluid && (
+          <Card
+            IconComponent={Image}
+            icon="tire"
+            iconSize={52}
+            title="Tranmission Fluid"
+            percentage={"N/A"}
+            date="Rotate on 2/5/25"
+            imgSource={require("../../assets/engine-oil.png")}
+            style={{ height: 70, width: 70 }}
+          />
+        )}
+
+        {showCoolant && (
+          <Card
+            IconComponent={Ionicons}
+            icon="snow-outline"
+            iconSize={52}
+            title="Engine Coolant"
+            percentage={"N/A"}
+            date="Rotate on 2/5/25"
+          />
+        )}
+        {/* more cards later */}
+      </ScrollView>
+      <Modal visible={showModal} animationType="fade" transparent={true}>
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitle}>Tire status</Text>
+            <Text style={{ marginBottom: 5, fontSize: 16 }}>ugy</Text>
+            <TextInput
+              style={styles.input}
+              placeholder=""
+              placeholderTextColor={"#555"}
+              // pull default value from db
+              defaultValue="15000"
+              value={servicedLife}
+              onChangeText={setServicedLife}
+              keyboardType="numeric"
+              returnKeyType="done"
+              blurOnSubmit={true}
+              onSubmitEditing={Keyboard.dismiss}
+            />
+            <Text style={{ color: "#555", fontSize: 12, marginBottom: -10 }}>
+              Pressing confirm sets date and mileage serviced on this item to
+              current
+            </Text>
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity style={styles.addButton} onPress={handleSubmit}>
+                <Text style={styles.buttonText}>Confirm</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => toggleModal()}
+              >
+                <Text style={styles.buttonText}>Cancel</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+      <BottomBar />
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({

@@ -24,23 +24,27 @@ import {
   query,
   where,
 } from "firebase/firestore";
+import { useVehicleContext } from "../utils/VehicleContext";
 
 export default function FinancesScreen({ navigation }) {
   const user = auth.currentUser;
+  const { selectedVehicleId } = useVehicleContext();
   const [payments, setPayments] = useState([]);
 
-  useEffect(() => {
-    if (user?.uid) {
-      fetchPayments(user.uid);
-    }
-  }, [user?.uid]);
+ useEffect(() => {
+   if (user?.uid && selectedVehicleId) {
+     fetchPayments(user.uid, selectedVehicleId);
+   }
+ }, [user?.uid, selectedVehicleId]);
+
 
   // fetch payments for current user
-  const fetchPayments = async (userId) => {
+  const fetchPayments = async (userId, vehicleId) => {
     try {
       const q = query(
         collection(db, "payments"),
-        where("userId", "==", userId)
+        where("userId", "==", userId),
+        where("vehicleId",  "==", vehicleId )
       );
       const querySnapshot = await getDocs(q);
       const fetchedPayments = querySnapshot.docs.map((doc) => ({
@@ -59,8 +63,9 @@ export default function FinancesScreen({ navigation }) {
       await setDoc(userPayments, {
         ...newPayment,
         userId: user.uid,
+        vehicleId: selectedVehicleId,
       });
-      fetchPayments(user.uid);
+fetchPayments(user.uid, selectedVehicleId);
     }
   };
 
@@ -119,8 +124,8 @@ export default function FinancesScreen({ navigation }) {
       <StatusBar animated backgroundColor={"#D9D9D9"} />
       <TopBar
         headingTitle="Finances"
-        pressableIcon={"add-outline"}
-        iconFunction={() => navigation.navigate("AddPayment", { addPayment })}
+        onSwitchPress={() => navigation.navigate("SelectVehicle")}
+        onAddPress={() => navigation.navigate("AddPayment", { addPayment })}
       />
 
       <TouchableOpacity

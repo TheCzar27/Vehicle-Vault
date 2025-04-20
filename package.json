@@ -11,15 +11,15 @@
   "dependencies": {
     "@react-native-async-storage/async-storage": "1.23.1",
     "@react-native-community/checkbox": "^0.5.17",
+    "@react-native-community/datetimepicker": "8.2.0",
     "@react-navigation/native": "^7.0.14",
     "@react-navigation/stack": "^7.1.1",
-    "@react-native-community/datetimepicker": "8.2.0",
     "axios": "^1.8.4",
     "expo": "~52.0.46",
     "expo-auth-session": "^6.0.3",
     "expo-font": "^13.0.3",
     "expo-linear-gradient": "~14.0.2",
-    "expo-location": "^18.0.10",
+    "expo-location": "~18.0.10",
     "expo-navigation-bar": "~4.0.9",
     "expo-router": "~4.0.20",
     "expo-status-bar": "~2.0.1",
@@ -44,11 +44,11 @@
     "react-native-ui-datepicker": "^3.0.5",
     "react-native-uuid": "^2.0.3",
     "react-native-vector-icons": "^10.2.0",
-    "styled-components": "^5.3.11"
+    "styled-components": "^5.3.11",
+    "@react-native-picker/picker": "2.9.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"
   },
   "private": true
 }
-

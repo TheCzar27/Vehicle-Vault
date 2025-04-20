@@ -1,8 +1,8 @@
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { auth, db } from "../config/firebaseConfig";
 import { refreshSmartCarTokens } from "./refreshSmartcarAuth";
 
-export const fetchVehicleData = async () => {
+export const fetchVehicleData = async (selectedVehicleId) => {
 	try {
 		// 1. Get the currently authenticated user.
 		const user = auth.currentUser;
@@ -10,42 +10,42 @@ export const fetchVehicleData = async () => {
 			throw new Error("No authenticated user found");
 		}
 		const userId = user.uid;
-		const service = "smart_car"; // Replace or parameterize if needed.
+		const service = "smart_car";
 
-		// 2. Fetch the token data from Firestore.
-		const tokenDocRef = doc(db, "users", userId, "auth_tokens", service);
-		const docSnap = await getDoc(tokenDocRef);
+		// 2. Fetch token from Firestore
+const tokenDocRef = doc(
+  db,
+  "users",
+  userId,
+  "vehicles",
+  selectedVehicleId,
+  "auth_tokens",
+  "smart_car"
+);		const docSnap = await getDoc(tokenDocRef);
 		if (!docSnap.exists()) {
 			console.log("No token data found for user.");
 			return;
 		}
-		const tokenData = docSnap.data();
-		const { accessToken, refreshToken, ttl, updateAt } = tokenData;
-		console.log(tokenData);
-		console.log(refreshToken);
-		if (!ttl) console.log("Missing ttl");
-		if (!updateAt) console.log("Missing updateAt");
-		if (!accessToken) {
-			console.log("Access token is missing:", tokenData);
-			return;
-		}
 
+		let { accessToken, refreshToken, ttl, updateAt } = docSnap.data();
+		console.log("Token data:", docSnap.data());
+
+		// 3. Refresh token if expired
 		if (updateAt && ttl) {
 			const DateUpdated = new Date(updateAt);
 			const expirationTime = DateUpdated.getTime() + ttl * 1000;
 			if (Date.now() > expirationTime) {
 				console.log("Token expired, refreshing...");
-				const newtokenData = await refreshSmartCarTokens(refreshToken);
-				accessToken = newtokenData.access_token;
+				const newTokenData = await refreshSmartCarTokens(refreshToken);
+				accessToken = newTokenData.access_token;
 			} else {
 				console.log("Token still valid");
 			}
 		} else {
-			console.log("Missing token ttl data");
+			console.log("Missing TTL or update timestamp");
 		}
 
-		// 3. Use the access token to call Smartcar endpoints.
-		// Example: Fetch list of vehicles.
+		// 4. Fetch list of SmartCar-connected vehicles
 		const vehiclesResponse = await fetch("https://api.smartcar.com/v1.0/vehicles", {
 			headers: { Authorization: `Bearer ${accessToken}` },
 		});
@@ -56,59 +56,58 @@ export const fetchVehicleData = async () => {
 			console.log("No vehicles connected.");
 			return;
 		}
-		// Example: Using the first vehicle in the list.
-		const vehicleId = vehiclesData.vehicles[0];
-		console.log("Using vehicleId:", vehicleId);
 
-		// Fetch additional vehicle data.
-		const vehicleInfoResponse = await fetch(`https://api.smartcar.com/v1.0/vehicles/${vehicleId}`, {
-			headers: { Authorization: `Bearer ${accessToken}` },
-		});
-		const vehicleInfo = await vehicleInfoResponse.json();
-		console.log("Vehicle Info:", vehicleInfo);
+		// Use selectedVehicleId if available, otherwise fall back to first SmartCar vehicle
+		const vehicleId = selectedVehicleId || vehiclesData.vehicles[0];
+		console.log("Using SmartCar vehicleId:", vehicleId);
 
-		// Fetch odometer data.
-		const odometerResponse = await fetch(
-			`https://api.smartcar.com/v1.0/vehicles/${vehicleId}/odometer`,
-			{
+		// 5. Fetch various endpoints from SmartCar
+		const [vehicleInfo, odometerData, oilData, tireData, gasData] = await Promise.all([
+			fetch(`https://api.smartcar.com/v1.0/vehicles/${vehicleId}`, {
 				headers: { Authorization: `Bearer ${accessToken}` },
-			}
-		);
-		const odometerData = await odometerResponse.json();
-		console.log("Odometer Data:", odometerData);
+			}).then(res => res.json()),
 
-		// 4. Fetch oil data.
-		const oilResponse = await fetch(
-			`https://api.smartcar.com/v2.0/vehicles/${vehicleId}/engine/oil`,
+			fetch(`https://api.smartcar.com/v1.0/vehicles/${vehicleId}/odometer`, {
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}).then(res => res.json()),
+
+			fetch(`https://api.smartcar.com/v2.0/vehicles/${vehicleId}/engine/oil`, {
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}).then(res => res.json()),
+
+			fetch(`https://api.smartcar.com/v2.0/vehicles/${vehicleId}/tires/pressure`, {
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}).then(res => res.json()),
+
+			fetch(`https://api.smartcar.com/v2.0/vehicles/${vehicleId}/fuel`, {
+				headers: { Authorization: `Bearer ${accessToken}` },
+			}).then(res => res.json()),
+		]);
+
+		console.log("Vehicle Info:", vehicleInfo);
+		console.log("Odometer:", odometerData);
+		console.log("Oil:", oilData);
+		console.log("Tires:", tireData);
+		console.log("Fuel:", gasData);
+
+		// 6. Save SmartCar data into Firestore under the selected vehicle
+		const vehicleRef = doc(db, "vehicles", selectedVehicleId);
+		await setDoc(
+			vehicleRef,
 			{
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
+				smartcarData: {
+					info: vehicleInfo,
+					odometer: odometerData,
+					oil: oilData,
+					tires: tireData,
+					fuel: gasData,
+					lastSynced: new Date().toISOString(),
 				},
-			}
-		);
-		const oilData = await oilResponse.json();
-		console.log("Oil life:", oilData);
-
-		// 5. Fetch tire data.
-		const tireResponse = await fetch(
-			`https://api.smartcar.com/v2.0/vehicles/${vehicleId}/tires/pressure`,
-			{
-				headers: {
-					Authorization: `Bearer ${accessToken}`,
-				},
-			}
-		);
-		const tireData = await tireResponse.json();
-		console.log("Tire pressure status:", tireData);
-
-		// 6. Fetch gas/fuel data.
-		const gasResponse = await fetch(`https://api.smartcar.com/v2.0/vehicles/${vehicleId}/fuel`, {
-			headers: {
-				Authorization: `Bearer ${accessToken}`,
 			},
-		});
-		const gasData = await gasResponse.json();
-		console.log("Gas data:", gasData);
+			{ merge: true }
+		);
+
+		console.log("SmartCar data successfully stored in Firestore.");
 	} catch (error) {
 		console.error("Error fetching vehicle data:", error);
 	}
