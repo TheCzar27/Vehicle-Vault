@@ -15,6 +15,7 @@ import {
 } from "react-native";
 import TopBar from "../components/TopBar";
 import BottomBar from "../components/BottomBar";
+import FilterCheckbox from "../components/FilterCheckbox";
 import Card from "../components/Card";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
@@ -63,13 +64,12 @@ export default function MaintenanceScreen({ navigation }) {
 	const [sparkLastChange, setSparkLastChange] = useState(18000);
 	const [transLastChange, setTransLastChange] = useState(18000);
 
-	// Recalculate alert conditions whenever dependent state variables change
+	// recalculate alert conditions whenever dependent state variables change
 	useEffect(() => {
-		// Compute the battery expiration date based on the current batteryLastChange
+		// compute the battery expiration date based on the current batteryLastChange
 		const batteryExpirationDate = new Date(batteryLastChange);
 		batteryExpirationDate.setFullYear(batteryExpirationDate.getFullYear() + 5);
 
-		// Compute alert conditions locally
 		const tireAlert =
 			FLTirePressure < 20 || FRTirePressure < 20 || BLTirePressure < 20 || BRTirePressure < 20;
 		const oilAlert = oilPercent < 20 || mileage - oilLastChange >= oilLife;
@@ -80,7 +80,7 @@ export default function MaintenanceScreen({ navigation }) {
 		const sparkAlert = mileage - sparkLastChange >= 80000;
 		const transAlert = mileage - transLastChange >= 45000;
 
-		// Update individual alert state variables
+		// update individual alert state variables
 		setShowTireAlert(tireAlert);
 		setShowOilAlert(oilAlert);
 		setShowBrakeAlert(brakeAlert);
@@ -90,7 +90,7 @@ export default function MaintenanceScreen({ navigation }) {
 		setShowSparkAlert(sparkAlert);
 		setShowTransAlert(transAlert);
 
-		// Set overall alerts state if any condition is met
+		// set overall alerts state if any condition is met
 		setShowAlerts(
 			tireAlert ||
 				oilAlert ||
@@ -123,7 +123,6 @@ export default function MaintenanceScreen({ navigation }) {
 			// logic when screen is focused
 			// update values from the database when the screen is focused
 			console.log("Maintenance is focused");
-			// If you need to manually trigger alerts after a DB fetch, call handleAlerts here or rely on the useEffect above.
 		}, [])
 	);
 
@@ -213,7 +212,7 @@ export default function MaintenanceScreen({ navigation }) {
 						icon="tire"
 						iconSize={52}
 						title="Break Pads"
-						percentage={"N/A"}
+						percentage={"72%"}
 						date="Serviced on 2/5/25"
 						imgSource={require("../../assets/break.png")}
 						style={{ height: 70, width: 70 }}
@@ -226,7 +225,7 @@ export default function MaintenanceScreen({ navigation }) {
 						icon="oil-can"
 						iconSize={42}
 						title="Oil"
-						percentage={"N/A"}
+						percentage={"65%"}
 						date="Last changed: 2/8/25"
 					/>
 				)}
@@ -308,21 +307,8 @@ export default function MaintenanceScreen({ navigation }) {
 			<Modal visible={showModal} animationType="fade" transparent={true}>
 				<View style={styles.modalContainer}>
 					<View style={styles.modalContent}>
-						<Text style={styles.modalTitle}>Tire status</Text>
-						<Text style={{ marginBottom: 5, fontSize: 16 }}>ugy</Text>
-						<TextInput
-							style={styles.input}
-							placeholder=""
-							placeholderTextColor={"#555"}
-							// pull default value from db
-							defaultValue="15000"
-							value={servicedLife}
-							onChangeText={setServicedLife}
-							keyboardType="numeric"
-							returnKeyType="done"
-							blurOnSubmit={true}
-							onSubmitEditing={Keyboard.dismiss}
-						/>
+						<Text style={styles.modalTitle}>Tires Rotated or Replaced?</Text>
+						<Text></Text>
 						<Text style={{ color: "#555", fontSize: 12, marginBottom: -10 }}>
 							Pressing confirm sets date and mileage serviced on this item to current
 						</Text>
