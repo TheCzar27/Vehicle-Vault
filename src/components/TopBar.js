@@ -9,11 +9,7 @@ export default function TopBar({ headingTitle, onSwitchPress, onAddPress, showBa
   return (
     <View style={styles.container}>
       <View style={styles.leftGroup}>
-        <Text style={styles.title}>{headingTitle}</Text>
-      </View>
-
-      <View style={styles.rightGroup}>
-        {showBack && (
+      {showBack && (
           <TouchableOpacity
             onPress={() => navigation.goBack()}
             style={{ marginRight: 12 }}
@@ -21,6 +17,10 @@ export default function TopBar({ headingTitle, onSwitchPress, onAddPress, showBa
             <MaterialCommunityIcons name="arrow-left" size={26} color="#000" />
           </TouchableOpacity>
         )}
+        <Text style={styles.title}>{headingTitle}</Text>
+      </View>
+
+      <View style={styles.rightGroup}>
         {onSwitchPress && (
           <TouchableOpacity onPress={onSwitchPress} style={styles.icon}>
             <Ionicons name="car" size={24} color="#000" />
