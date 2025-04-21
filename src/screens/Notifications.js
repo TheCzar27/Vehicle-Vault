@@ -67,7 +67,7 @@ export default function NotificationsScreen() {
     const newCategories = [...categories];
 
     const options = newCategories[categoryIndex].options;
-    const optionIndex = options.findIndex((o) => o.id === optionId);
+    const optionIndex = options.findIndex((o) => o.id === optionID);
 
     options[optionIndex].enabled = !options[optionIndex].enabled;
 
