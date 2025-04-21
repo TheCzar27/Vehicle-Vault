@@ -18,11 +18,11 @@ export default function NotificationsScreen() {
   const navigation = useNavigation();
 
   // list of notification options, both initially set to be disabled
-  const [emailEnabled, setEmailEnabled] = useState(false);
+  const [pushEnabled, setPushEnabled] = useState(false);
 
   const NOTI_CATEGORIES = [
     {
-      title: "Maintenance Notifications",
+      title: "Maintenance",
       options: [
         {id: "reminders", label: "Upcoming Maintenance Reminders", enabled: false },
         {id: "overdue", label: "Overdue Maintenance Alerts", enabled: false },
@@ -30,18 +30,16 @@ export default function NotificationsScreen() {
       ],
     },
     {
-      title: "Finance Notifications",
+      title: "Finance",
       options: [
         {id: "paymentDue", label: "Upcoming Payment Reminders", enabled: false},
         {id: "latePayment", label: "Late Payment Alerts", enabled: false },
-        {id: "monthlySummary", label: "Monthly Spending Summary", enabled: false},
       ],
     },
     {
-      title: "Garage Notifications",
+      title: "Garage",
       options: [
         {id: "vehicleAdded", label: "New Vehicle Added to Garage", enabled: false},
-        {id: "insuranceExpiration", label: "Insurance Expiration Reminders", enabled: false},
         {id: "milageMilestone", label: "Vehicle Mileage Milestone Alerts", enabled: false},
       ],
     },
@@ -77,7 +75,7 @@ export default function NotificationsScreen() {
   // determines if user has any type of notis enabled
   // if they do, then it will display the different categories
   // if not, then they will remain hidden
-  const anyNotificationEnabled = emailEnabled;
+  const anyNotificationEnabled = pushEnabled;
 
   return (
     <SafeAreaView style={styles.container}>
@@ -89,10 +87,10 @@ export default function NotificationsScreen() {
 
         <View style={styles.masterToggleRow}>
           <View style={styles.iconContainer}>
-            <MaterialCommunityIcons name="email-outline" size={26} color="#000" />
+            <MaterialCommunityIcons name="bell-outline" size={26} color="#000" />
           </View>
-          <Text style={styles.masterToggleLabel}>Enable Email Notifications</Text>
-          <Switch value={emailEnabled} onValueChange={() => setEmailEnabled((prev) => !prev)} />
+          <Text style={styles.masterToggleLabel}>Enable Push Notifications</Text>
+          <Switch value={pushEnabled} onValueChange={() => setPushEnabled((prev) => !prev)} />
         </View>
 
         {/* SUB-CATEGORIES (MAINTENANCE, FINANCE, GARAGE) */}
