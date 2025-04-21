@@ -28,7 +28,7 @@ import { useVehicleContext } from "../utils/VehicleContext";
 
 export default function FinancesScreen({ navigation }) {
   const user = auth.currentUser;
-  const { selectedVehicleId } = useVehicleContext();
+  const { selectedVehicleId, selectedVehicle } = useVehicleContext();
   const [payments, setPayments] = useState([]);
 
  useEffect(() => {
@@ -127,6 +127,11 @@ fetchPayments(user.uid, selectedVehicleId);
         onSwitchPress={() => navigation.navigate("SelectVehicle")}
         onAddPress={() => navigation.navigate("AddPayment", { addPayment })}
       />
+      {selectedVehicle && (
+        <Text style={styles.vehicleNameLabel}>
+          {selectedVehicle.vehicleName || "Unnamed Vehicle"}
+        </Text>
+      )}
 
       <TouchableOpacity
         onPress={() => {
@@ -183,5 +188,13 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 6,
     marginTop: 6,
+  },
+  vehicleNameLabel: {
+    fontSize: 16,
+    fontWeight: "600",
+    textAlign: "center",
+    marginTop: 10,
+    marginBottom: 4,
+    color: "#444",
   },
 });

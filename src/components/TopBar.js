@@ -1,8 +1,11 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 
-export default function TopBar({ headingTitle, onSwitchPress, onAddPress }) {
+
+export default function TopBar({ headingTitle, onSwitchPress, onAddPress, showBack= false }) {
+      const navigation = useNavigation();
   return (
     <View style={styles.container}>
       <View style={styles.leftGroup}>
@@ -10,6 +13,14 @@ export default function TopBar({ headingTitle, onSwitchPress, onAddPress }) {
       </View>
 
       <View style={styles.rightGroup}>
+        {showBack && (
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={{ marginRight: 12 }}
+          >
+            <MaterialCommunityIcons name="arrow-left" size={26} color="#000" />
+          </TouchableOpacity>
+        )}
         {onSwitchPress && (
           <TouchableOpacity onPress={onSwitchPress} style={styles.icon}>
             <Ionicons name="car" size={24} color="#000" />

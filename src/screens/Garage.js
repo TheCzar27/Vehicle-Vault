@@ -20,10 +20,13 @@ import {
 import { auth, db } from "../config/firebaseConfig";
 import BottomBar from "../components/BottomBar";
 import TopBar from "../components/TopBar";
-import AddVehicle from "../components/AddVehicle";
 import { useVehicleContext } from "../utils/VehicleContext";
 import { Picker } from "@react-native-picker/picker";
 import { useNavigation } from "@react-navigation/native";
+import AddVehicleByVIN from "../components/AddVehicleByVIN";
+import EditVehicleModal from "../components/EditVehicle";
+import { Ionicons } from "@expo/vector-icons";
+
 
 
 export default function Garage() {
@@ -36,9 +39,12 @@ export default function Garage() {
   } = useVehicleContext();
 
   const [username, setUsername] = useState("");
-  const [addVehicleModalVisible, setAddVehicleModalVisible] = useState(false);
   const user = auth.currentUser;
   const navigation = useNavigation();
+const [addByVinVisible, setAddByVinVisible] = useState(false);
+const [editModalVisible, setEditModalVisible] = useState(false);
+
+
 
   useEffect(() => {
     if (user?.uid) {
@@ -118,7 +124,7 @@ export default function Garage() {
       <TopBar
         headingTitle="Garage"
         onSwitchPress={() => navigation.navigate("SelectVehicle")}
-        onAddPress={() => setAddVehicleModalVisible(true)}
+        onAddPress={() => setAddByVinVisible(true)}
       />
 
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
@@ -127,6 +133,10 @@ export default function Garage() {
             <Text style={styles.detailTitle}>
               {selectedVehicle.vehicleName}
             </Text>
+            <TouchableOpacity onPress={() => setEditModalVisible(true)}>
+              <Ionicons name="pencil" size={22} color="#444" />
+            </TouchableOpacity>
+
             <Text>VIN: {selectedVehicle.vin}</Text>
             <Text>Fuel Efficiency: {selectedVehicle.fuelEfficiency} MPG</Text>
             <Text>Trade-in Value: ${selectedVehicle.tradeInValue}</Text>
@@ -149,10 +159,23 @@ export default function Garage() {
         <View style={{ height: 60 }} />
       </ScrollView>
 
-      <AddVehicle
-        visible={addVehicleModalVisible}
-        onClose={() => setAddVehicleModalVisible(false)}
-        onAdd={handleAddVehicle}
+      <AddVehicleByVIN
+        visible={addByVinVisible}
+        onClose={() => setAddByVinVisible(false)}
+        onAdd={(vehicle) => {
+          setVehicles((prev) => [...prev, vehicle]);
+          setSelectedVehicleId(vehicle.id);
+        }}
+      />
+      <EditVehicleModal
+        visible={editModalVisible}
+        vehicle={selectedVehicle}
+        onClose={() => setEditModalVisible(false)}
+        onSave={(updated) => {
+          setVehicles((prev) =>
+            prev.map((v) => (v.id === updated.id ? updated : v))
+          );
+        }}
       />
 
       <View style={styles.bottomBarWrapper}>
@@ -203,3 +226,14 @@ const styles = StyleSheet.create({
     right: 0,
   },
 });
+
+
+<View
+  style={{
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  }}
+>
+  
+</View>;

@@ -42,7 +42,7 @@ import { Picker } from "@react-native-picker/picker";
 export default function MaintenanceScreen({ navigation }) {
   const { promptAsync } = useSmartCarAuth();
   const user = auth.currentUser;
-  const { selectedVehicleId, vehicleList, setSelectedVehicleId } =
+  const { selectedVehicleId, vehicleList, setSelectedVehicleId, selectedVehicle } =
     useVehicleContext();
   const [showAlerts, setShowAlerts] = useState(false);
   const [showTireAlert, setShowTireAlert] = useState(false);
@@ -212,22 +212,7 @@ export default function MaintenanceScreen({ navigation }) {
       alert("Failed to save record.");
     }
   };
-  const pickerElement = (
-    <Picker
-      selectedValue={selectedVehicleId}
-      style={{ height: 30, width: 150, marginLeft: 10 }}
-      onValueChange={(itemValue) => setSelectedVehicleId(itemValue)}
-      mode="dropdown"
-    >
-      {(vehicleList || []).map((vehicle) => (
-        <Picker.Item
-          key={vehicle.id}
-          label={vehicle.name || "Unnamed"}
-          value={vehicle.id}
-        />
-      ))}
-    </Picker>
-  );
+  
 
 
   return (
@@ -238,6 +223,12 @@ export default function MaintenanceScreen({ navigation }) {
         pressableIcon={"filter"}
         iconFunction={() => navigation.navigate("MaintenanceFilters")}
       />
+      {selectedVehicle && (
+        <Text style={styles.vehicleNameLabel}>
+          {selectedVehicle.vehicleName || "Unnamed Vehicle"}
+        </Text>
+      )}
+
       <TouchableOpacity
         style={styles.smartCarButton}
         onPress={handleSmartCarConnect}
@@ -478,166 +469,174 @@ export default function MaintenanceScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		backgroundColor: "#fff",
-	},
-	scrollContent: {
-		padding: 16,
-		paddingTop: 40,
-	},
-	tirecontainer: {
-		display: "flex",
-		flexDirection: "column",
-		backgroundColor: "#CFD6E1",
-		height: 200,
-		borderRadius: 8,
-		padding: 16,
-		marginHorizontal: 20,
-		marginBottom: 40,
-	},
-	lowerContainer: {
-		display: "flex",
-		flexDirection: "row",
-		justifyContent: "center",
-		alignItems: "center",
-		height: 144,
-	},
-	title: {
-		fontSize: 20,
-		fontWeight: "bold",
-		height: 24,
-	},
-	leftcontainer: {
-		flex: 1,
-		alignItems: "flex-end",
-		justifyContent: "space-between",
-		height: 120,
-	},
-	innercontainer: {
-		borderColor: "#000",
-		flex: 1,
-		flexDirection: "row",
-		marginTop: 22,
-		gap: 8,
-	},
-	rightcontainer: {
-		flex: 1,
-		height: 120,
-	},
-	textContainer: {
-		justifyContent: "center",
-		alignItems: "center",
-		width: "70%",
-	},
-	percentage: {
-		fontSize: 28,
-		marginTop: -8,
-	},
-	wheels: {
-		height: 25,
-		width: 16,
-		borderRadius: 5,
-		backgroundColor: "#000",
-	},
-	date: {
-		marginTop: 4,
-		fontSize: 12,
-		color: "#666",
-	},
-	popupback: {
-		position: "absolute",
-		top: 70,
-		left: 0,
-		flex: 1,
-		height: "86%",
-		width: "100%",
-		alignItems: "center",
-		justifyContent: "center",
-		backgroundColor: "rgba(0, 0, 0, 0.4)",
-	},
-	popupfront: {
-		height: 100,
-		width: "70%",
-		backgroundColor: "#dfdfdf",
-		borderRadius: 15,
-		alignItems: "center",
-	},
-	popuptext: {
-		fontSize: 18,
-		marginTop: 10,
-	},
-	button: {
-		backgroundColor: "#fff",
-		height: "50%",
-		width: "35%",
-		borderRadius: 10,
-		alignItems: "center",
-		justifyContent: "center",
-	},
-	alertContainer: {
-		backgroundColor: "#ff6969",
-		display: "flex",
-		alignItems: "center",
-		justifyContent: "center",
-		borderRadius: 8,
-		padding: 10,
-		marginHorizontal: 20,
-		marginBottom: 40,
-		gap: 8,
-	},
-	alertText: {
-		fontSize: 16,
-		backgroundColor: "#faa1a1",
-		paddingVertical: 2,
-		width: 300,
-		textAlign: "center",
-		borderRadius: 8,
-	},
-	modalContainer: {
-		flex: 1,
-		backgroundColor: "rgba(0, 0, 0, 0.5)",
-		justifyContent: "center",
-		alignItems: "center",
-	},
-	modalContent: {
-		width: "90%",
-		backgroundColor: "#FFFFFF",
-		borderRadius: 10,
-		padding: 20,
-	},
-	modalTitle: {
-		fontSize: 20,
-		fontWeight: "bold",
-		marginBottom: 20,
-		textAlign: "center",
-	},
-	input: {
-		borderWidth: 1,
-		borderColor: "#D9D9D9",
-		borderRadius: 5,
-		padding: 10,
-		marginBottom: 15,
-		fontSize: 16,
-	},
-	buttonContainer: {
-		flexDirection: "row",
-		justifyContent: "space-around",
-		marginTop: 20,
-	},
-	addButton: {
-		backgroundColor: "#4682B4",
-		borderRadius: 5,
-		padding: 10,
-	},
-	cancelButton: {
-		backgroundColor: "#B0E0E6",
-		borderRadius: 5,
-		padding: 10,
-	},
-	buttonText: {
-		color: "#FFFFFF",
-		fontWeight: "bold",
-		textAlign: "center",
-	},
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  scrollContent: {
+    padding: 16,
+    paddingTop: 40,
+  },
+  tirecontainer: {
+    display: "flex",
+    flexDirection: "column",
+    backgroundColor: "#CFD6E1",
+    height: 200,
+    borderRadius: 8,
+    padding: 16,
+    marginHorizontal: 20,
+    marginBottom: 40,
+  },
+  lowerContainer: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    height: 144,
+  },
+  title: {
+    fontSize: 20,
+    fontWeight: "bold",
+    height: 24,
+  },
+  leftcontainer: {
+    flex: 1,
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+    height: 120,
+  },
+  innercontainer: {
+    borderColor: "#000",
+    flex: 1,
+    flexDirection: "row",
+    marginTop: 22,
+    gap: 8,
+  },
+  rightcontainer: {
+    flex: 1,
+    height: 120,
+  },
+  textContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    width: "70%",
+  },
+  percentage: {
+    fontSize: 28,
+    marginTop: -8,
+  },
+  wheels: {
+    height: 25,
+    width: 16,
+    borderRadius: 5,
+    backgroundColor: "#000",
+  },
+  date: {
+    marginTop: 4,
+    fontSize: 12,
+    color: "#666",
+  },
+  popupback: {
+    position: "absolute",
+    top: 70,
+    left: 0,
+    flex: 1,
+    height: "86%",
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
+  },
+  popupfront: {
+    height: 100,
+    width: "70%",
+    backgroundColor: "#dfdfdf",
+    borderRadius: 15,
+    alignItems: "center",
+  },
+  popuptext: {
+    fontSize: 18,
+    marginTop: 10,
+  },
+  button: {
+    backgroundColor: "#fff",
+    height: "50%",
+    width: "35%",
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  alertContainer: {
+    backgroundColor: "#ff6969",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 8,
+    padding: 10,
+    marginHorizontal: 20,
+    marginBottom: 40,
+    gap: 8,
+  },
+  alertText: {
+    fontSize: 16,
+    backgroundColor: "#faa1a1",
+    paddingVertical: 2,
+    width: 300,
+    textAlign: "center",
+    borderRadius: 8,
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalContent: {
+    width: "90%",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 10,
+    padding: 20,
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 20,
+    textAlign: "center",
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#D9D9D9",
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 15,
+    fontSize: 16,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginTop: 20,
+  },
+  addButton: {
+    backgroundColor: "#4682B4",
+    borderRadius: 5,
+    padding: 10,
+  },
+  cancelButton: {
+    backgroundColor: "#B0E0E6",
+    borderRadius: 5,
+    padding: 10,
+  },
+  buttonText: {
+    color: "#FFFFFF",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  vehicleNameLabel: {
+    fontSize: 16,
+    fontWeight: "600",
+    textAlign: "center",
+    marginTop: 10,
+    marginBottom: 4,
+    color: "#444",
+  },
 });
